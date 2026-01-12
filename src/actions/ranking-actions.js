@@ -408,7 +408,7 @@ var RankingActions = {
 						var parts = entry.split(',');
 						if (parts.length >= 2) {
 							extraData.push({
-								database: parts[0].toUpperCase(), // "SJR", "CORE", "ABS"
+								database: parts[0].toUpperCase(), // "SJR", "CORE", "ABS", "FT50"
 								ranking: parts[1].trim()           // "Q1 0.85", "A*"
 							});
 						}

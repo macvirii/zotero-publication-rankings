@@ -154,7 +154,9 @@ var ColumnManager = {
 				var e = line.split(',');
 				let b = {
 					color: e[2],
-					text: e[0].toUpperCase().trim() + ': ' + e[1]
+					text: !e[1] || e[1].trim() === '' ?
+						' ' + e[0].toUpperCase().trim() + ' ' :
+						e[0].toUpperCase().trim() + ': ' + e[1].trim()
 				};
 				bItems.push(b);
 			});

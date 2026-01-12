@@ -80,6 +80,7 @@ var RankingEngine = {
 				debugLog(`Trying database: ${db.name} (priority ${db.priority})`);
 				
 				var rank = db.matcher(normalizedTitle, debugLog);
+				debugLog(`Matcher in ${db.name} return rank: ${rank}`);
 				if (rank) {
 					debugLog(`✓ FOUND in ${db.name}: ${rank}`);
 					switch (db.id) {
@@ -92,9 +93,13 @@ var RankingEngine = {
 						case 'abs':
 							rank = 'ABS: ' + rank;
 							break;
+						case 'ft50':
+							rank = 'FT50';
+							break;
                     }
 
 					ranking = rank + ' ' + ranking;
+					debugLog(`Ranking = ${ranking}`);
 				}
 			}
 

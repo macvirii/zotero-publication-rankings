@@ -80,6 +80,8 @@ var UIUtils = {
 					return '#D32F2F'; // Red (lowest)
 				};
 				break;
+			case "ft50":
+				return '#2E7D32'; // Dark Green
 
 			default:
 				// Default for other rankings (TBR, Unranked, etc.)
@@ -209,6 +211,9 @@ var UIUtils = {
 				if (ranking === '3') return 'ABS 3';
 				if (ranking === '2') return 'ABS 2';
 				if (ranking === '1') return 'ABS 1';
+			case "ft50":
+				// FT50
+				return 'Financial Times 50 journal ranking';
 		}
 		return ranking;
 	},
