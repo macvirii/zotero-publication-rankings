@@ -1,6 +1,6 @@
 # Installation Guide
 
-## Publication Rankings for Zotero 7
+## Publication Rankings for Zotero 7/8
 
 **Author:** Ben Stephens  
 **License:** GNU General Public License v3.0 (GPLv3)  
@@ -11,8 +11,8 @@
 1. **Download the Plugin**
    - The plugin file is: `publication-rankings-x.x.x.xpi`
 
-2. **Install in Zotero 7**
-   - Open Zotero 7
+2. **Install in Zotero 7/8**
+   - Open Zotero 7/8
    - Go to **Tools → Add-ons** (or press Ctrl+Shift+A)
    - Click the **gear icon** (⚙️) in the top-right corner
    - Select **"Install Add-on From File..."**
@@ -49,6 +49,14 @@ The plugin displays rankings in a custom "Ranking" column with:
 - National: `Nat US`, `Nat AU`, etc.
 - Other: `TBR` (To Be Ranked), `Unranked`
 - 2,107+ conferences covered
+
+### CABS ABS Rankings (2024)
+- Format: `1`, `2`, `3`, `4`, `4*`
+- 1,822 journals
+
+### Financial Times 50 Journal Rank (FT50)
+- Format: `FT50`
+- 50 Journals
 
 ## Matching Algorithm
 
@@ -119,6 +127,8 @@ To update the ranking data:
 1. Download new CSV files:
    - SJR: https://www.scimagojr.com/journalrank.php
    - CORE: http://portal.core.edu.au/conf-ranks/
+   - ABS: https://journalranking.org
+   - FT50: https://www.ft.com/content/3405a512-5cbb-11e1-8f1f-00144feabdc0
 
 2. Run the Python generator:
    ```python

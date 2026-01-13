@@ -9,7 +9,12 @@ A Zotero plugin that automatically displays journal and conference rankings in a
 - **Custom "Ranking" Column**: See rankings at a glance without modifying your metadata
 - **SJR Journal Rankings**: 30,818+ journals with quartiles (Q1-Q4) and SJR scores
 - **CORE Conference Rankings**: 2,107+ conferences (A*, A, B, C) with historical editions
+- **ABS Rankings**: 1,822 journals
+- **FT50 Rankings**: 50 journals
 - **Color-Coded Display**: Green (Q1/A*) → Blue (Q2/A) → Orange (Q3/B) → Red (Q4/C)
+<img src="assets/Rankings_Text.png" style="width: 300px; display: block; margin: 0 auto;">
+- **Badge Display**: 
+<img src="assets/Rankings_Badges.png" style="width: 300px; display: block; margin: 0 auto;">
 - **Smart Matching**: 8 fuzzy matching strategies handle title variations and acronyms
 - **Automatic Updates**: Rankings appear when items are added or viewed
 - **Sortable Column**: Click column header to sort by ranking tier (A* → Q4)
@@ -92,7 +97,9 @@ Access via Edit → Preferences (Zotero → Settings on Mac), then select "Ranki
 
 ### Ranking Databases
 - **SJR (SCImago Journal Rankings)**: Always enabled - 30,818+ journals
-- **CORE (Computing Research & Education)**: Toggleable - 2,107+ conferences
+- **CORE (Computing Research & Education)**: Toggleable - 2,173+ conferences
+- **ABS Rankings***: Toggleable - 1,822 journals
+- **FT50 Rankings***: Toggleable - 50 journals
 
 ### Auto-Update Settings
 - **Enable auto-update**: Automatically refresh rankings when viewing items
@@ -108,7 +115,7 @@ Access via Edit → Preferences (Zotero → Settings on Mac), then select "Ranki
 
 ### Updating Rankings Data
 
-When new SJR or CORE rankings are released:
+When new rankings are released:
 
 ```bash
 cd update-scripts
@@ -118,6 +125,12 @@ python extract_sjr.py
 
 # Step 2: Extract CORE rankings (from full_CORE.csv with historical data)
 python extract_full_core.py
+
+# Step 3: Extract ABS rankings (from ABSRanking2024_FullList.csv)
+python extract_abs.py
+
+# Step 4: Extract FT50 rankings (from FT50_FullList.csv)
+python extract_ft-50.py
 
 # Step 3: Combine into plugin data file
 python generate_data_js.py
@@ -138,6 +151,7 @@ This creates the `.xpi` file ready for installation (e.g., `publication-rankings
 
 ```
 zotero-publication-rankings/
+├── assets/							# Assets for the pages
 ├── src/                              # Source modules (organized by function)
 │   ├── core/                         # Core plugin functionality
 │   │   ├── rankings.js              # Main coordinator (226 lines)
@@ -146,9 +160,11 @@ zotero-publication-rankings/
 │   ├── data/
 │   │   └── data.js                  # Rankings databases (32,934 lines)
 │   ├── databases/                    # Database registry & plugins
-│   │   ├── database-registry.js     # Central registry system
-│   │   ├── database-sjr.js          # SJR matching logic (145 lines)
-│   │   └── database-core.js         # CORE matching logic (47 lines)
+│   │   ├── database-registry.js		# Central registry system
+│   │   ├── database-sjr.js			# SJR matching logic (145 lines)
+│   │   ├── database-core.js			# CORE matching logic (47 lines)
+│   │   ├── database-abs.js			# ABS matching logic 
+│   │   └── database-ft-50.js			# FT50 matching logic	
 │   ├── engine/                       # Ranking engine
 │   │   ├── ranking-engine.js        # Core ranking coordinator (132 lines)
 │   │   └── matching.js              # String normalization & algorithms
@@ -163,8 +179,10 @@ zotero-publication-rankings/
 ├── update-scripts/                   # Data extraction scripts
 │   ├── scimagojr 2024.csv           # SJR source data
 │   ├── full_CORE.csv                # CORE source data
-│   ├── extract_sjr.py               # Extract SJR rankings
-│   ├── extract_full_core.py         # Extract CORE rankings
+│   ├── extract_sjr.py				# Extract SJR rankings
+│   ├── extract_full_core.py			# Extract CORE rankings
+│   ├── extract_abs.py				# Extract ABS rankings
+│   ├── extract_ft-50.py				# Extract FT50 rankings
 │   └── generate_data_js.py          # Combine into data.js
 ├── manifest.json                     # Plugin metadata
 ├── bootstrap.js                      # Plugin lifecycle hooks & module loader (150 lines)
@@ -194,7 +212,9 @@ The plugin uses an extensible modular architecture designed for maintainability 
 #### Data Layer
 - **`data.js`** (32,934 lines) - Ranking databases
   - `sjrRankings`: 30,818 journals with quartiles (Q1-Q4) and SJR scores
-  - `coreRankings`: 2,107 conferences with tiers (A*, A, B, C) and historical editions
+  - `coreRankings`: 2,173 conferences with tiers (A*, A, B, C) and historical editions
+  - `absRankings`: 1,822 journals with ranking (1, 2, 3, 4, 4*)
+  - `ft50Rankings`: 50 journals
 
 #### Database Registry System
 - **`database-registry.js`** (126 lines) - Central registry for all ranking databases
@@ -255,6 +275,8 @@ For detailed architecture documentation, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 - **SJR 2024**: [SCImago Journal & Country Rank](https://www.scimagojr.com/)
 - **CORE 2023**: [Computing Research and Education](http://portal.core.edu.au/conf-ranks/)
+- **ABS 2024**: [ABS Ranking](https://journalranking.org)
+- **FT50**: [FT50 Ranking](https://www.ft.com/content/3405a512-5cbb-11e1-8f1f-00144feabdc0)
 
 ## License
 

@@ -8,7 +8,7 @@
 # XPI files are just ZIP files with a different extension
 
 pluginName="publication-rankings"
-version="0.2.0"
+version="0.3.0"
 outputFile="${pluginName}-${version}.xpi"
 
 # Remove old XPI if it exists
