@@ -13,8 +13,10 @@ A Zotero plugin that automatically displays journal and conference rankings in a
 - **FT50 Rankings**: 50 journals
 - **Color-Coded Display**: Green (Q1/A*) → Blue (Q2/A) → Orange (Q3/B) → Red (Q4/C)
 <img src="assets/Rankings_Text.png" style="width: 300px; display: block; margin: 0 auto;">
+
 - **Badge Display**: 
 <img src="assets/Rankings_Badges.png" style="width: 300px; display: block; margin: 0 auto;">
+
 - **Smart Matching**: 8 fuzzy matching strategies handle title variations and acronyms
 - **Automatic Updates**: Rankings appear when items are added or viewed
 - **Sortable Column**: Click column header to sort by ranking tier (A* → Q4)
