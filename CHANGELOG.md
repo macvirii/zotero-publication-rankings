@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-1-16
+- Updated the color and sort order methods to include the database id
+- Updated the version of the plugin to work in Zotero 8
+- Added FT50 rankings
+- Added some information about the rankings in the preference pane
+- Updated README.md and INSTALL.md documents
+
+
 ## [0.2.0] - 2025-12-10
 
 ### Added
