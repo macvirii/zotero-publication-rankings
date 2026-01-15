@@ -12,30 +12,69 @@
     <description style="margin-bottom: 10px;">Select which ranking databases to use for matching publications. SJR is always enabled as the primary journal ranking source.</description>
     
     <vbox style="margin-left: 20px;">
-        <checkbox id="publication-rankings-enableSJR" 
+        <!-- SJR -->
+        <checkbox id="publication-rankings-enableSJR"
                   label="✓ SCImago Journal Rankings (SJR)"
                   checked="true"
-                  disabled="true"/>
+                  disabled="true" />
         <description style="margin-left: 25px; margin-bottom: 10px; color: gray;">
             Primary journal ranking database with quartile classifications (Q1-Q4). Always enabled.
         </description>
-        
-        <checkbox id="publication-rankings-enableCORE" 
+        <html:div style="margin-left: 25px; margin-bottom: 10px;">
+            <label value="Source:" />
+            <label is="zotero-text-link" value="SCImago Journal &amp; Country Rank" href="https://www.scimagojr.com/" />
+        </html:div>
+        <html:div style="margin-left: 25px; margin-bottom: 20px;">
+            <label value="Last Update:" />
+            <label value="2024" />
+        </html:div>
+        <!-- CORE -->
+        <checkbox id="publication-rankings-enableCORE"
                   label="CORE Conference Rankings"
-                  preference="extensions.publication-rankings.enableCORE"/>
+                  preference="extensions.publication-rankings.enableCORE" />
         <description style="margin-left: 25px; margin-bottom: 10px;">
             Australian Computing Research and Education (CORE) conference rankings (A*, A, B, C).
         </description>
-
+        <html:div style="margin-left: 25px; margin-bottom: 10px;">
+            <label value="Source:" />
+            <label is="zotero-text-link" value="ICORE Conference" href="https://portal.core.edu.au/conf-ranks/" />
+        </html:div>
+        <html:div style="margin-left: 25px; margin-bottom: 20px;">
+            <label value="Last Update:" />
+            <label value="2023" />
+        </html:div>
+        <!-- ABS -->
         <checkbox id="publication-rankings-enableABS"
                   label="CABS Journal Rankings (ABS)"
-                  preference="extensions.publication-rankings.enableABS"/>
+                  preference="extensions.publication-rankings.enableABS" />
         <description style="margin-left: 25px; margin-bottom: 10px;">
             Chartered Association of Business Schools (CABS) journal rankings (1, 2, 3, 4, 4*)
         </description>
-  
-      </vbox>
-    
+        <html:div style="margin-left: 25px; margin-bottom: 10px;">
+            <label value="Source:" />
+            <label is="zotero-text-link" value="ABS Journal Rankings 2024" href="https://journalranking.org" />
+        </html:div>
+        <html:div style="margin-left: 25px; margin-bottom: 20px;">
+            <label value="Last Update:" />
+            <label value="2024" />
+        </html:div>
+        <!-- FT50 -->
+        <checkbox id="publication-rankings-enableFT50"
+                  label="Financial Times 50 Research Rank (FT50)"
+                  preference="extensions.publication-rankings.enableFT50" />
+        <description style="margin-left: 25px; margin-bottom: 10px;">
+            Financial Times FT50 journal rankings
+        </description>
+        <html:div style="margin-left: 25px; margin-bottom: 10px;">
+            <label value="Source:" />
+            <label is="zotero-text-link" value="50 Journals used in FT Research Rank" href="https://www.ft.com/content/3405a512-5cbb-11e1-8f1f-00144feabdc0" />
+        </html:div>
+        <html:div style="margin-left: 25px; margin-bottom: 20px;">
+            <label value="Last Update:" />
+            <label value="2012" />
+        </html:div>
+    </vbox>
+
     <description style="margin-top: 10px; font-style: italic;">
         Note: Additional databases (JCR, Qualis, ERA) may be added in future versions.
     </description>

@@ -16,7 +16,6 @@
  */
 
 /* global Zotero, ZoteroRankings, ManualOverrides, RankingActions, Services */
-
 var Hooks = {
 	/**
 	 * Plugin startup - called when extension is loaded
@@ -37,7 +36,6 @@ var Hooks = {
 		Zotero.PreferencePanes.register({
 			pluginID: 'publication-rankings@zotero.org',
 			src: rootURI + 'preferences.xhtml',
-		//	scripts: [rootURI + 'src/core/prefs-abs.js'],
 			label: 'Rankings'
 		});
 		

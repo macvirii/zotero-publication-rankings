@@ -125456,6 +125456,7 @@ var coreRankings = {
   "World Sustainable Building Conference": "C [2023]",
   "WSEAS International Conference on Robotics, Control and Manufacturing Technology": "C [2023]"
 };
+
 // ABS Rankings
 // Total journals: 1822
 var absRankings = {
@@ -130926,3 +130927,59 @@ var absRankings = {
     "abs": "1"
   }
 };
+
+// FT50 Rankings
+// Total journals: 50
+var ft50Rankings = [
+  "academy of management journal",
+  "academy of management review",
+  "accounting",
+  "administrative science quarterly",
+  "american economic review",
+  "contemporary accounting research",
+  "econometrica",
+  "entrepreneurship theory and practice",
+  "harvard business review",
+  "human relations",
+  "human resource management",
+  "information systems research",
+  "journal of accounting and economics",
+  "journal of accounting research",
+  "journal of applied psychology",
+  "journal of business ethics",
+  "journal of business venturing",
+  "journal of consumer psychology",
+  "journal of consumer research",
+  "journal of finance",
+  "journal of financial and quantitative analysis",
+  "journal of financial economics",
+  "journal of international business studies",
+  "journal of management",
+  "journal of management information systems",
+  "journal of management studies",
+  "journal of marketing",
+  "journal of marketing research",
+  "journal of operations management",
+  "journal of political economy",
+  "journal of the academy of marketing science",
+  "management science",
+  "manufacturing and service operations management",
+  "marketing science",
+  "mis quarterly",
+  "operations research",
+  "organization science",
+  "organization studies",
+  "organizational behavior and human decision processes",
+  "production and operations management",
+  "quarterly journal of economics",
+  "research policy",
+  "review of accounting studies",
+  "review of economic studies",
+  "review of finance",
+  "review of financial studies",
+  "sloan management review",
+  "strategic entrepreneurship journal",
+  "strategic management journal",
+  "the accounting review"
+];
+

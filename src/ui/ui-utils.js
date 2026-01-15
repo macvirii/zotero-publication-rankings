@@ -12,72 +12,81 @@ var UIUtils = {
 	 * @param {string} ranking - The ranking (e.g., "A*", "Q1", "Nat RU")
 	 * @returns {string} CSS color code
 	 */
-	getRankingColor: function(ranking) {
+	getRankingColor: function(id, ranking) {
 		if (!ranking) return null;
-		
-		// SJR Quartiles (Green to Red gradient)
-		if (ranking.startsWith('Q1')) {
-			return '#2E7D32'; // Dark green (best)
-		}
-		if (ranking.startsWith('Q2')) {
-			return '#0288D1'; // Blue
-		}
-		if (ranking.startsWith('Q3')) {
-			return '#F57C00'; // Orange
-		}
-		if (ranking.startsWith('Q4')) {
-			return '#D32F2F'; // Red (lowest)
-		}
-		
-		// CORE Conference Rankings (same gradient)
-		if (ranking === 'A*' || ranking.startsWith('A* ')) {
-			return '#2E7D32'; // Dark green (best)
-		}
-		if (ranking === 'A' || ranking.startsWith('A ') || ranking.startsWith('A[')) {
-			return '#0288D1'; // Blue
-		}
-		if (ranking === 'B' || ranking.startsWith('B ') || ranking.startsWith('B[')) {
-			return '#F57C00'; // Orange
-		}
-		if (ranking === 'C' || ranking.startsWith('C ') || ranking.startsWith('C[')) {
-			return '#D32F2F'; // Red
-		}
-		
-		// Australasian Rankings (same gradient)
-		if (ranking.startsWith('Au A')) {
-			return '#0288D1'; // Blue
-		}
-		if (ranking.startsWith('Au B')) {
-			return '#F57C00'; // Orange
-		}
-		if (ranking.startsWith('Au C')) {
-			return '#D32F2F'; // Red
-		}
-		
-		// National Rankings (use purple to distinguish from main tiers)
-		if (ranking.startsWith('Nat ')) {
-			return '#7B1FA2'; // Purple
-		}
 
-		// ABS Ranking (Green to Red gradient)
-		if (ranking.startsWith('4*')) {
-			return '#2E7D32'; // Dark green (best)
-		}
-		if (ranking.startsWith('4')) {
-			return '#92D050'
-        }
-		if (ranking.startsWith('3')) {
-			return '#0288D1'; // Blue
-		}
-		if (ranking.startsWith('2')) {
-			return '#F57C00'; // Orange
-		}
-		if (ranking.startsWith('1')) {
-			return '#D32F2F'; // Red (lowest)
-		}
+		switch (id) {
+			case "sjr":
+				// SJR Quartiles (Green to Red gradient)
+				if (ranking.startsWith('Q1')) {
+					return '#2E7D32'; // Dark green (best)
+				};
+				if (ranking.startsWith('Q2')) {
+					return '#0288D1'; // Blue
+				};
+				if (ranking.startsWith('Q3')) {
+					return '#F57C00'; // Orange
+				};
+				if (ranking.startsWith('Q4')) {
+					return '#D32F2F'; // Red (lowest)
+				};
+				break;
+			case "core":
+				// CORE Conference Rankings (same gradient)
+				if (ranking === 'A*' || ranking.startsWith('A* ')) {
+					return '#2E7D32'; // Dark green (best)
+				};
+				if (ranking === 'A' || ranking.startsWith('A ') || ranking.startsWith('A[')) {
+					return '#0288D1'; // Blue
+				};
+				if (ranking === 'B' || ranking.startsWith('B ') || ranking.startsWith('B[')) {
+					return '#F57C00'; // Orange
+				};
+				if (ranking === 'C' || ranking.startsWith('C ') || ranking.startsWith('C[')) {
+					return '#D32F2F'; // Red
+				};
 
-		// Default for other rankings (TBR, Unranked, etc.)
-		return '#757575'; // Gray
+				// Australasian Rankings (same gradient)
+				if (ranking.startsWith('Au A')) {
+					return '#0288D1'; // Blue
+				};
+				if (ranking.startsWith('Au B')) {
+					return '#F57C00'; // Orange
+				};
+				if (ranking.startsWith('Au C')) {
+					return '#D32F2F'; // Red
+				};
+
+				// National Rankings (use purple to distinguish from main tiers)
+				if (ranking.startsWith('Nat ')) {
+					return '#7B1FA2'; // Purple
+				};
+				break;
+			case "abs":
+				// ABS Ranking (Green to Red gradient)
+				if (ranking.startsWith('4*')) {
+					return '#2E7D32'; // Dark green (best)
+				};
+				if (ranking.startsWith('4')) {
+					return '#92D050'
+				};
+				if (ranking.startsWith('3')) {
+					return '#0288D1'; // Blue
+				};
+				if (ranking.startsWith('2')) {
+					return '#F57C00'; // Orange
+				};
+				if (ranking.startsWith('1')) {
+					return '#D32F2F'; // Red (lowest)
+				};
+				break;
+			case "ft50":
+				return '#2E7D32'; // Dark Green
+
+			default:
+				// Default for other rankings (TBR, Unranked, etc.)
+				return '#757575'; // Gray
+		}
 	},
 
 	/**
@@ -86,51 +95,57 @@ var UIUtils = {
 	 * @param {string} ranking - The ranking string
 	 * @returns {number} Sort value
 	 */
-	getRankingSortValue: function (ranking) {
+	getRankingSortValue: function (id, ranking) {
 		if ((!ranking) || (ranking == 'N/A')) return 0;
-		
-		// CORE A* = highest
-		if (ranking === 'A*' || ranking.startsWith('A* ')) return 1000;
-		
-		// SJR Q1 / CORE A
-		if (ranking.startsWith('Q1')) return 900;
-		if (ranking === 'A' || ranking.startsWith('A ') || ranking.startsWith('A[')) return 850;
-		
-		// Australasian A
-		if (ranking.startsWith('Au A')) return 840;
-		
-		// SJR Q2 / CORE B
-		if (ranking.startsWith('Q2')) return 700;
-		if (ranking === 'B' || ranking.startsWith('B ') || ranking.startsWith('B[')) return 650;
-		
-		// Australasian B
-		if (ranking.startsWith('Au B')) return 640;
-		
-		// SJR Q3 / CORE C
-		if (ranking.startsWith('Q3')) return 500;
-		if (ranking === 'C' || ranking.startsWith('C ') || ranking.startsWith('C[')) return 450;
-		
-		// Australasian C
-		if (ranking.startsWith('Au C')) return 440;
-		
-		// SJR Q4
-		if (ranking.startsWith('Q4')) return 300;
-		
-		// National rankings
-		if (ranking.startsWith('Nat A')) return 250;
-		if (ranking.startsWith('Nat B')) return 200;
-		if (ranking.startsWith('Nat C')) return 150;
-		if (ranking.startsWith('Nat ')) return 100;
 
-		// ABS Ranking
-		if (ranking.startsWith('4*')) return 249;
-		if (ranking.startsWith('4')) return 248;
-		if (ranking.startsWith('3')) return 247;
-		if (ranking.startsWith('2')) return 246;
-		if (ranking.startsWith('1')) return 245;
-		
-		// Other/Unknown rankings
-		return 50;
+		switch (id) {
+			case "sjr":
+			case "core":
+				// CORE A* = highest
+				if (ranking === 'A*' || ranking.startsWith('A* ')) return 1000;
+
+				// SJR Q1 / CORE A
+				if (ranking.startsWith('Q1')) return 900;
+				if (ranking === 'A' || ranking.startsWith('A ') || ranking.startsWith('A[')) return 850;
+
+				// Australasian A
+				if (ranking.startsWith('Au A')) return 840;
+
+				// SJR Q2 / CORE B
+				if (ranking.startsWith('Q2')) return 700;
+				if (ranking === 'B' || ranking.startsWith('B ') || ranking.startsWith('B[')) return 650;
+
+				// Australasian B
+				if (ranking.startsWith('Au B')) return 640;
+
+				// SJR Q3 / CORE C
+				if (ranking.startsWith('Q3')) return 500;
+				if (ranking === 'C' || ranking.startsWith('C ') || ranking.startsWith('C[')) return 450;
+
+				// Australasian C
+				if (ranking.startsWith('Au C')) return 440;
+
+				// SJR Q4
+				if (ranking.startsWith('Q4')) return 300;
+
+				// National rankings
+				if (ranking.startsWith('Nat A')) return 250;
+				if (ranking.startsWith('Nat B')) return 200;
+				if (ranking.startsWith('Nat C')) return 150;
+				if (ranking.startsWith('Nat ')) return 100;
+
+				// ABS Ranking
+				if (ranking.startsWith('4*')) return 249;
+				if (ranking.startsWith('4')) return 248;
+				if (ranking.startsWith('3')) return 247;
+				if (ranking.startsWith('2')) return 246;
+				if (ranking.startsWith('1')) return 245;
+
+				break;
+			default:
+				// Other/Unknown rankings
+				return 50;
+		}
 	},
 
 	/**
@@ -139,11 +154,14 @@ var UIUtils = {
 	 * @param {string} ranking - The ranking string
 	 * @returns {string} Formatted ranking with sort prefix
 	 */
-	formatRankingForDisplay: function(ranking) {
+	formatRankingForDisplay: function(id, ranking) {
 		if (!ranking) return '';
-		
+		if (!id) {
+			id = "sjr";
+        }
+
 		// Get sort value and zero-pad to 4 digits
-		var sortValue = this.getRankingSortValue(ranking);
+		var sortValue = this.getRankingSortValue(id, ranking);
 		var sortPrefix = String(sortValue).padStart(4, '0');
 		
 		// Return with invisible prefix for sorting
@@ -167,29 +185,36 @@ var UIUtils = {
 	 * @param {string} ranking - The ranking
 	 * @returns {string} Description
 	 */
-	getRankingDescription: function(ranking) {
+	getRankingDescription: function(id, ranking) {
 		if (!ranking) return 'No ranking found';
-		
-		// CORE rankings
-		if (ranking === 'A*') return 'CORE A* - Flagship conference';
-		if (ranking === 'A') return 'CORE A - Excellent conference';
-		if (ranking === 'B') return 'CORE B - Good conference';
-		if (ranking === 'C') return 'CORE C - Solid conference';
-		if (ranking.startsWith('Nat')) return 'CORE ' + ranking + ' - National ranking';
-		
-		// SJR quartiles
-		if (ranking === 'Q1') return 'SJR Q1 - Top 25% of journals';
-		if (ranking === 'Q2') return 'SJR Q2 - Top 50% of journals';
-		if (ranking === 'Q3') return 'SJR Q3 - Top 75% of journals';
-		if (ranking === 'Q4') return 'SJR Q4 - Bottom 25% of journals';
 
-		// ABS Quantriles
-		if (ranking === '4*') return 'ABS 4*';
-		if (ranking === '4') return 'ABS 4';
-		if (ranking === '3') return 'ABS 3';
-		if (ranking === '2') return 'ABS 2';
-		if (ranking === '1') return 'ABS 1';
-
+		switch (id) {
+			case "core":
+				// CORE rankings
+				if (ranking === 'A*') return 'CORE A* - Flagship conference';
+				if (ranking === 'A') return 'CORE A - Excellent conference';
+				if (ranking === 'B') return 'CORE B - Good conference';
+				if (ranking === 'C') return 'CORE C - Solid conference';
+				if (ranking.startsWith('Nat')) return 'CORE ' + ranking + ' - National ranking';
+				break;
+			case "sjr":
+				// SJR quartiles
+				if (ranking === 'Q1') return 'SJR Q1 - Top 25% of journals';
+				if (ranking === 'Q2') return 'SJR Q2 - Top 50% of journals';
+				if (ranking === 'Q3') return 'SJR Q3 - Top 75% of journals';
+				if (ranking === 'Q4') return 'SJR Q4 - Bottom 25% of journals';
+				break;
+			case "abs":
+				// ABS Quantriles
+				if (ranking === '4*') return 'ABS 4*';
+				if (ranking === '4') return 'ABS 4';
+				if (ranking === '3') return 'ABS 3';
+				if (ranking === '2') return 'ABS 2';
+				if (ranking === '1') return 'ABS 1';
+			case "ft50":
+				// FT50
+				return 'Financial Times 50 journal ranking';
+		}
 		return ranking;
 	},
 
