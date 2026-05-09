@@ -83,7 +83,7 @@ var ColumnManager = {
 	 * // Returns: "8999|Q1 0.85" (for display as "Q1 0.85", sorted as 8999)
 	 */
 	dataProvider: function(item, dataKey) {
-		const itemID = item.id;
+		const itemID = String(item.id);
 		let rankingData;
 		
 		// Use cache if available (cache stores array of ranking objects)
@@ -104,7 +104,7 @@ var ColumnManager = {
 		// Since higher values = better ranking, but alphabetical sort is ascending,
 		// we invert the value (9999 - sortValue) so best items sort first
 		// Format: "invertedSortValue|ranking" where invertedSortValue is 4-digit zero-padded
-		const sortValue = UIUtils.getRankingSortValue(itemID, ranking);
+		const sortValue = this.getBestSortValue(rankingData);
 		const invertedValue = 9999 - sortValue; // Invert: 1000 becomes 8999, 50 becomes 9949
 		const paddedValue = String(invertedValue).padStart(4, '0');
 
@@ -144,13 +144,20 @@ var ColumnManager = {
 		// Failsafe in case the code below does not work
 		cell.innerHTML = content;
 
-		var item = Zotero.Items.get(itemID);
-		if (item) {
+		var rankingData = this.rankingCache.get(String(itemID));
+		if (!rankingData) {
+			var item = Zotero.Items.get(itemID);
+			if (item) {
+				rankingData = RankingEngine.getRankingArray(item);
+				this.rankingCache.set(String(itemID), rankingData);
+			}
+		}
+
+		if (rankingData) {
 			// Determine the right font colour
 			var bItems = [];
 			content = '';
-			var r = RankingEngine.getRankingArray(item);
-			r.reverse().forEach(function (line) {
+			rankingData.slice().reverse().forEach(function (line) {
 				var e = line.split(',');
 				let b = {
 					color: e[2],
@@ -193,26 +200,7 @@ var ColumnManager = {
 					badge.style.height = '20px';  // Height of the circle
 					badge.style.borderRadius = '10%';  // Make it round
 
-					// Use the color variable for the background 
-					// Soften the colour a bit, because it is very bright for background color
-					var hex = color.replace(/^#/, '');
-					let r = parseInt(hex.substring(0, 2), 16);
-					let g = parseInt(hex.substring(2, 4), 16);
-					let b = parseInt(hex.substring(4, 6), 16);
-
-					// Lighten the colour
-					var factor = 0.2;
-					r = Math.round(r + (255 - r) * factor);
-					g = Math.round(g + (255 - g) * factor);
-					b = Math.round(b + (255 - b) * factor);
-
-					// Back to Hex
-					let red = r.toString(16).padStart(2, '0');
-					let green = g.toString(16).padStart(2, '0')
-					let blue = b.toString(16).padStart(2, '0');
-
-					
-					badge.style.backgroundColor = `#${red}${green}${blue}` ;
+					badge.style.backgroundColor = UIUtils.getBadgeBackgroundColor(color);
 
 					badge.style.display = 'flex';
 					badge.style.alignItems = 'left';
@@ -227,7 +215,7 @@ var ColumnManager = {
 					badgeText.style.transform = 'translate(-50%, -50%)'; // adjust centering
 					badgeText.style.color = 'white';
 					badgeText.style.fontWeight = 'bold';
-					badgeText.style.fontSize = (badgeText.style.fontSize - 2) + 'px';
+					badgeText.style.fontSize = '11px';
 
 					// Attach the text to the badge
 					badge.appendChild(badgeText);
@@ -238,6 +226,24 @@ var ColumnManager = {
 			}
 			return cell;
 		}
+	},
+
+	getBestSortValue: function(rankingData) {
+		if (!rankingData || rankingData.length === 0) {
+			return 0;
+		}
+
+		var bestValue = 0;
+		for (var i = 0; i < rankingData.length; i++) {
+			var fields = rankingData[i].split(',');
+			if (fields.length >= 2) {
+				var sortValue = UIUtils.getRankingSortValue(fields[0], fields[1].trim());
+				if (sortValue > bestValue) {
+					bestValue = sortValue;
+				}
+			}
+		}
+		return bestValue;
 	},
 	
 	/**
@@ -302,7 +308,7 @@ var ColumnManager = {
 	 * // Returns: ["sjr,Q1 0.85,#color", "core,A*,#color"] or undefined
 	 */
 	getCachedRanking: function(itemID) {
-		return this.rankingCache.get(itemID);
+		return this.rankingCache.get(String(itemID));
 	},
 	
 	/**
@@ -352,7 +358,7 @@ var ColumnManager = {
 	 * // Returns: "SJR: Q1 0.85 CORE: A*" or undefined
 	 */
 	getCachedRankingForItem: function(itemID) {
-		var rankingData = this.rankingCache.get(itemID);
+		var rankingData = this.rankingCache.get(String(itemID));
 		if (!rankingData) {
 			return undefined;
 		}
@@ -370,6 +376,6 @@ var ColumnManager = {
 	 * ColumnManager.setCachedRanking(12345, ["sjr,Q1 0.85,#color"]);
 	 */
 	setCachedRanking: function(itemID, rankingData) {
-		this.rankingCache.set(itemID, rankingData);
+		this.rankingCache.set(String(itemID), rankingData);
 	}
 };

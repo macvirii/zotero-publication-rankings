@@ -8,6 +8,23 @@
 /* global MatchingUtils, DatabaseRegistry, abdcRankings */
 
 var ABDCDatabase = {
+	normalizedTitleIndex: null,
+
+	buildIndex: function() {
+		if (this.normalizedTitleIndex) {
+			return;
+		}
+
+		this.normalizedTitleIndex = Object.create(null);
+		var byTitle = abdcRankings.byTitle || {};
+		for (var title in byTitle) {
+			var normalized = MatchingUtils.normalizeString(title);
+			if (!this.normalizedTitleIndex[normalized]) {
+				this.normalizedTitleIndex[normalized] = byTitle[title];
+			}
+		}
+	},
+
 	normalizeIssn: function(value) {
 		var cleaned = (value || '').replace(/[^0-9Xx]/g, '').toUpperCase();
 		return cleaned.length === 8 ? cleaned : '';
@@ -31,6 +48,7 @@ var ABDCDatabase = {
 	},
 
 	findByTitle: function(title) {
+		this.buildIndex();
 		var byTitle = abdcRankings.byTitle || {};
 		var exact = title.trim().toLowerCase();
 		if (byTitle[exact]) {
@@ -38,12 +56,7 @@ var ABDCDatabase = {
 		}
 
 		var normalized = MatchingUtils.normalizeString(title);
-		for (var abdcTitle in byTitle) {
-			if (MatchingUtils.normalizeString(abdcTitle) === normalized) {
-				return byTitle[abdcTitle];
-			}
-		}
-		return null;
+		return this.normalizedTitleIndex[normalized] || null;
 	},
 
 	match: function(title, debugLog, item) {

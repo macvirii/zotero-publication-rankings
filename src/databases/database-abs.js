@@ -9,6 +9,22 @@
 /* global Zotero, sjrRankings, MatchingUtils, DatabaseRegistry */
 
 var absDatabase = {
+	normalizedTitleIndex: null,
+
+	buildIndex: function() {
+		if (this.normalizedTitleIndex) {
+			return;
+		}
+
+		this.normalizedTitleIndex = Object.create(null);
+		for (var absTitle in absRankings) {
+			var normalized = MatchingUtils.normalizeString(absTitle);
+			if (!this.normalizedTitleIndex[normalized]) {
+				this.normalizedTitleIndex[normalized] = absRankings[absTitle];
+			}
+		}
+	},
+
 	/**
 	* Main Matching Function
     * @param {string} title - Publication title to match
@@ -17,15 +33,14 @@ var absDatabase = {
  */
 	match: function (title, debugLog) {
 		debugLog(`[ABS] Retrieving ranking from database...`);
+		this.buildIndex();
 
-		var result = ''
-		for (var absTitle in absRankings) {
-			if (title.trim().toLowerCase() == absTitle.trim().toLowerCase()) {
-				debugLog(`[ABS] ✓ Journal Found: "${absTitle}" -> $(absRankings[absTitle])`);
-				result = absRankings[absTitle].abs;
-				break;
-            }
-        }
+		var exact = title.trim().toLowerCase();
+		var entry = absRankings[exact] || this.normalizedTitleIndex[MatchingUtils.normalizeString(title)];
+		var result = entry ? entry.abs : '';
+		if (result) {
+			debugLog(`[ABS] ✓ Journal Found -> ${result}`);
+		}
 
 		if ((result == 'N/A') || (!result)) {
 			debugLog('[ABS] Journal NOT found: "${title}"');

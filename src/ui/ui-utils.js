@@ -7,6 +7,32 @@
  */
 
 var UIUtils = {
+	badgeColorCache: {},
+
+	getBadgeBackgroundColor: function(color) {
+		if (!color) return '#BDBDBD';
+		if (this.badgeColorCache[color]) {
+			return this.badgeColorCache[color];
+		}
+
+		var hex = color.replace(/^#/, '');
+		var r = parseInt(hex.substring(0, 2), 16);
+		var g = parseInt(hex.substring(2, 4), 16);
+		var b = parseInt(hex.substring(4, 6), 16);
+		var factor = 0.2;
+
+		r = Math.round(r + (255 - r) * factor);
+		g = Math.round(g + (255 - g) * factor);
+		b = Math.round(b + (255 - b) * factor);
+
+		var result = '#' +
+			r.toString(16).padStart(2, '0') +
+			g.toString(16).padStart(2, '0') +
+			b.toString(16).padStart(2, '0');
+		this.badgeColorCache[color] = result;
+		return result;
+	},
+
 	/**
 	 * Get color for a ranking badge
 	 * @param {string} ranking - The ranking (e.g., "A*", "Q1", "Nat RU")

@@ -8,6 +8,23 @@
 /* global MatchingUtils, DatabaseRegistry, qualisCapes2021Rankings */
 
 var QualisCapesDatabase = {
+    normalizedTitleIndex: null,
+
+    buildIndex: function() {
+        if (this.normalizedTitleIndex) {
+            return;
+        }
+
+        this.normalizedTitleIndex = Object.create(null);
+        var byTitle = qualisCapes2021Rankings.byTitle || {};
+        for (var title in byTitle) {
+            var normalized = MatchingUtils.normalizeString(title);
+            if (!this.normalizedTitleIndex[normalized]) {
+                this.normalizedTitleIndex[normalized] = byTitle[title];
+            }
+        }
+    },
+
     normalizeIssn: function(value) {
         var cleaned = (value || '').replace(/[^0-9Xx]/g, '').toUpperCase();
         return cleaned.length === 8 ? cleaned : '';
@@ -31,6 +48,7 @@ var QualisCapesDatabase = {
     },
 
     findByTitle: function(title) {
+        this.buildIndex();
         var byTitle = qualisCapes2021Rankings.byTitle || {};
         var exact = title.trim().toLowerCase();
         if (byTitle[exact]) {
@@ -38,12 +56,7 @@ var QualisCapesDatabase = {
         }
 
         var normalized = MatchingUtils.normalizeString(title);
-        for (var qualisTitle in byTitle) {
-            if (MatchingUtils.normalizeString(qualisTitle) === normalized) {
-                return byTitle[qualisTitle];
-            }
-        }
-        return null;
+        return this.normalizedTitleIndex[normalized] || null;
     },
 
     match: function(title, debugLog, item) {

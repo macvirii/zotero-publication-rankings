@@ -8,6 +8,23 @@
 /* global MatchingUtils, DatabaseRegistry, spellRankings */
 
 var SPELLDatabase = {
+	normalizedTitleIndex: null,
+
+	buildIndex: function() {
+		if (this.normalizedTitleIndex) {
+			return;
+		}
+
+		this.normalizedTitleIndex = Object.create(null);
+		var byTitle = spellRankings.byTitle || {};
+		for (var title in byTitle) {
+			var normalized = MatchingUtils.normalizeString(title);
+			if (!this.normalizedTitleIndex[normalized]) {
+				this.normalizedTitleIndex[normalized] = byTitle[title];
+			}
+		}
+	},
+
 	displayClass: function(spellClass) {
 		switch (spellClass) {
 			case 'top10':
@@ -24,6 +41,7 @@ var SPELLDatabase = {
 	},
 
 	findByTitle: function(title) {
+		this.buildIndex();
 		var byTitle = spellRankings.byTitle || {};
 		var exact = title.trim().toLowerCase();
 		if (byTitle[exact]) {
@@ -31,12 +49,7 @@ var SPELLDatabase = {
 		}
 
 		var normalized = MatchingUtils.normalizeString(title);
-		for (var spellTitle in byTitle) {
-			if (MatchingUtils.normalizeString(spellTitle) === normalized) {
-				return byTitle[spellTitle];
-			}
-		}
-		return null;
+		return this.normalizedTitleIndex[normalized] || null;
 	},
 
 	match: function(title, debugLog) {

@@ -8,12 +8,60 @@
 /* global MatchingUtils, DatabaseRegistry, abdcRankings, absRankings, jcrRankings, sjrRankings, spellRankings, scieloRankings */
 
 var CapesNovaDatabase = {
+    simpleTitleIndexes: Object.create(null),
+    sjrIssnIndex: null,
+
     gradeValue: {
         'I': 0,
         'F': 1,
         'R': 2,
         'B': 3,
         'MB': 4
+    },
+
+    getStructuredTitleIndex: function(dataset) {
+        if (!dataset._normalizedTitleIndex) {
+            dataset._normalizedTitleIndex = Object.create(null);
+            var byTitle = dataset.byTitle || {};
+            for (var title in byTitle) {
+                var normalized = MatchingUtils.normalizeString(title);
+                if (!dataset._normalizedTitleIndex[normalized]) {
+                    dataset._normalizedTitleIndex[normalized] = byTitle[title];
+                }
+            }
+        }
+        return dataset._normalizedTitleIndex;
+    },
+
+    getSimpleTitleIndex: function(name, dataset) {
+        if (!this.simpleTitleIndexes[name]) {
+            var index = Object.create(null);
+            for (var title in dataset) {
+                var normalized = MatchingUtils.normalizeString(title);
+                if (!index[normalized]) {
+                    index[normalized] = dataset[title];
+                }
+            }
+            this.simpleTitleIndexes[name] = index;
+        }
+        return this.simpleTitleIndexes[name];
+    },
+
+    getSjrIssnIndex: function() {
+        if (this.sjrIssnIndex) {
+            return this.sjrIssnIndex;
+        }
+
+        this.sjrIssnIndex = Object.create(null);
+        for (var title in sjrRankings) {
+            var issns = sjrRankings[title].issns || [];
+            for (var i = 0; i < issns.length; i++) {
+                if (!this.sjrIssnIndex[issns[i]]) {
+                    this.sjrIssnIndex[issns[i]] = sjrRankings[title];
+                }
+            }
+        }
+        return this.sjrIssnIndex;
     },
 
     normalizeIssn: function(value) {
@@ -57,41 +105,28 @@ var CapesNovaDatabase = {
             return byTitle[exact];
         }
 
-        var normalized = MatchingUtils.normalizeString(title);
-        for (var sourceTitle in byTitle) {
-            if (MatchingUtils.normalizeString(sourceTitle) === normalized) {
-                return byTitle[sourceTitle];
-            }
-        }
-        return null;
+        return this.getStructuredTitleIndex(dataset)[MatchingUtils.normalizeString(title)] || null;
     },
 
-    findSimpleTitleEntry: function(dataset, title) {
+    findSimpleTitleEntry: function(name, dataset, title) {
         var exact = title.trim().toLowerCase();
         if (dataset[exact]) {
             return dataset[exact];
         }
 
-        var normalized = MatchingUtils.normalizeString(title);
-        for (var sourceTitle in dataset) {
-            if (MatchingUtils.normalizeString(sourceTitle) === normalized) {
-                return dataset[sourceTitle];
-            }
-        }
-        return null;
+        return this.getSimpleTitleIndex(name, dataset)[MatchingUtils.normalizeString(title)] || null;
     },
 
     findSjrEntry: function(title, item) {
         var issns = this.extractIssns(item);
-        for (var sourceTitle in sjrRankings) {
-            var sourceIssns = sjrRankings[sourceTitle].issns || [];
-            for (var i = 0; i < issns.length; i++) {
-                if (sourceIssns.indexOf(issns[i]) !== -1) {
-                    return sjrRankings[sourceTitle];
-                }
+        var issnIndex = this.getSjrIssnIndex();
+        for (var i = 0; i < issns.length; i++) {
+            if (issnIndex[issns[i]]) {
+                return issnIndex[issns[i]];
             }
         }
-        return this.findSimpleTitleEntry(sjrRankings, title);
+
+        return this.findSimpleTitleEntry('sjr', sjrRankings, title);
     },
 
     addBestGrade: function(current, candidate) {
@@ -184,7 +219,7 @@ var CapesNovaDatabase = {
             debugLog('[Nova CAPES] Source ABDC: ' + abdcEntry.abdc + ' -> ' + bestGrade);
         }
 
-        var absEntry = this.findSimpleTitleEntry(absRankings, title);
+        var absEntry = this.findSimpleTitleEntry('abs', absRankings, title);
         if (absEntry && absEntry.abs) {
             matchedAnySource = true;
             bestGrade = this.addBestGrade(bestGrade, this.gradeFromAbs(absEntry.abs));

@@ -13,6 +13,71 @@
 /* global Zotero, sjrRankings, MatchingUtils, DatabaseRegistry */
 
 var SJRDatabase = {
+	exactIndex: null,
+	cleanedIndex: null,
+	wordIndex: null,
+	issnIndex: null,
+
+	buildIndexes: function() {
+		if (this.exactIndex) {
+			return;
+		}
+
+		this.exactIndex = Object.create(null);
+		this.cleanedIndex = Object.create(null);
+		this.wordIndex = [];
+		this.issnIndex = Object.create(null);
+
+		for (var sjrTitle in sjrRankings) {
+			var sjrData = sjrRankings[sjrTitle];
+			var lowerTitle = sjrTitle.toLowerCase();
+			var cleanedTitle = MatchingUtils.normalizeString(sjrTitle.split(',')[0].trim());
+			var normalizedTitle = MatchingUtils.normalizeString(sjrTitle);
+			var words = normalizedTitle.split(' ').filter(function(w) { return w.length > 3; });
+
+			if (!this.exactIndex[lowerTitle]) {
+				this.exactIndex[lowerTitle] = sjrData;
+			}
+			if (cleanedTitle.length > 10 && !this.cleanedIndex[cleanedTitle]) {
+				this.cleanedIndex[cleanedTitle] = sjrData;
+			}
+			this.wordIndex.push({ title: sjrTitle, data: sjrData, words: words });
+
+			var issns = sjrData.issns || [];
+			for (var i = 0; i < issns.length; i++) {
+				if (!this.issnIndex[issns[i]]) {
+					this.issnIndex[issns[i]] = sjrData;
+				}
+			}
+		}
+	},
+
+	formatResult: function(sjrData) {
+		return sjrData.quartile + " " + sjrData.sjr;
+	},
+
+	normalizeIssn: function(value) {
+		var cleaned = (value || '').replace(/[^0-9Xx]/g, '').toUpperCase();
+		return cleaned.length === 8 ? cleaned : '';
+	},
+
+	extractIssns: function(item) {
+		if (!item || !item.getField) {
+			return [];
+		}
+
+		var issnField = item.getField('ISSN') || '';
+		var matches = issnField.match(/[0-9Xx]{4}[- ]?[0-9Xx]{4}/g) || [];
+		var issns = [];
+		for (var i = 0; i < matches.length; i++) {
+			var issn = this.normalizeIssn(matches[i]);
+			if (issn && issns.indexOf(issn) === -1) {
+				issns.push(issn);
+			}
+		}
+		return issns;
+	},
+
 	/**
 	 * Main matching function - tries all strategies in order
 	 * 
@@ -20,12 +85,27 @@ var SJRDatabase = {
 	 * @param {Function} debugLog - Debug logging function
 	 * @returns {string|null} Ranking string (e.g., "Q1 0.85") or null if not found
 	 */
-	match: function(title, debugLog) {
+	match: function(title, debugLog, item) {
 		debugLog(`[SJR] Trying SJR database...`);
+		this.buildIndexes();
 		
-		return this.matchExact(title, debugLog) ||
+		return this.matchIssn(item, debugLog) ||
+		       this.matchExact(title, debugLog) ||
 		       this.matchFuzzy(title, debugLog) ||
 		       this.matchWordOverlap(title, debugLog);
+	},
+
+	matchIssn: function(item, debugLog) {
+		var issns = this.extractIssns(item);
+		for (var i = 0; i < issns.length; i++) {
+			var sjrData = this.issnIndex[issns[i]];
+			if (sjrData) {
+				var result = this.formatResult(sjrData);
+				debugLog(`[SJR] ✓ ISSN MATCH: "${issns[i]}" -> ${result}`);
+				return result;
+			}
+		}
+		return null;
 	},
 
 	/**
@@ -39,13 +119,11 @@ var SJRDatabase = {
 		var normalizedSearch = title.toLowerCase();
 		debugLog(`[SJR] Trying exact match (lowercase): "${normalizedSearch}"`);
 		
-		for (var sjrTitle in sjrRankings) {
-			if (sjrTitle.toLowerCase() === normalizedSearch) {
-				var sjrData = sjrRankings[sjrTitle];
-				const result = sjrData.quartile + " " + sjrData.sjr;
-				debugLog(`[SJR] ✓ EXACT MATCH: "${sjrTitle}" -> ${result}`);
-				return result;
-			}
+		var sjrData = this.exactIndex[normalizedSearch];
+		if (sjrData) {
+			const result = this.formatResult(sjrData);
+			debugLog(`[SJR] ✓ EXACT MATCH -> ${result}`);
+			return result;
 		}
 		
 		debugLog(`[SJR] No exact match found`);
@@ -63,16 +141,11 @@ var SJRDatabase = {
 		var cleanedSearch = MatchingUtils.normalizeString(MatchingUtils.cleanConferenceTitle(title));
 		debugLog(`[SJR] Trying fuzzy match: "${cleanedSearch}"`);
 		
-		for (var sjrTitle in sjrRankings) {
-			// Remove ", ACRONYM" part from SJR title
-			var cleanedSjr = MatchingUtils.normalizeString(sjrTitle.split(',')[0].trim());
-			
-			if (cleanedSjr === cleanedSearch && cleanedSjr.length > 10) {
-				var sjrData = sjrRankings[sjrTitle];
-				const result = sjrData.quartile + " " + sjrData.sjr;
-				debugLog(`[SJR] ✓ FUZZY MATCH: "${sjrTitle}" -> ${result}`);
-				return result;
-			}
+		var sjrData = this.cleanedIndex[cleanedSearch];
+		if (sjrData) {
+			const result = this.formatResult(sjrData);
+			debugLog(`[SJR] ✓ FUZZY MATCH -> ${result}`);
+			return result;
 		}
 		
 		debugLog(`[SJR] No fuzzy match found`);
@@ -96,9 +169,9 @@ var SJRDatabase = {
 		
 		debugLog(`[SJR] Trying word overlap: cleaned="${cleanedSearch}", words=[${searchWords.join(', ')}]`);
 		
-		for (var sjrTitle in sjrRankings) {
-			var cleanedSjr = MatchingUtils.normalizeString(sjrTitle);
-			var sjrWords = cleanedSjr.split(' ').filter(function(w) { return w.length > 3; });
+		for (var i = 0; i < this.wordIndex.length; i++) {
+			var candidate = this.wordIndex[i];
+			var sjrWords = candidate.words;
 			
 			// Count how many significant words overlap
 			var matchCount = 0;
@@ -118,16 +191,15 @@ var SJRDatabase = {
 			if (sjrWords.length >= 5 && 
 			    sjrOverlap >= 0.85 && 
 			    searchOverlap >= 0.80) {
-				var sjrData = sjrRankings[sjrTitle];
-				const result = sjrData.quartile + " " + sjrData.sjr;
-				debugLog(`[SJR] ✓ WORD OVERLAP MATCH: "${sjrTitle}"`);
+				const result = this.formatResult(candidate.data);
+				debugLog(`[SJR] ✓ WORD OVERLAP MATCH: "${candidate.title}"`);
 				debugLog(`[SJR]   Matched ${matchCount}/${sjrWords.length} SJR words (${(sjrOverlap*100).toFixed(0)}%), ${matchCount}/${searchWords.length} search words (${(searchOverlap*100).toFixed(0)}%)`);
 				debugLog(`[SJR]   Result: ${result}`);
 				return result;
 			}
 		}
 		
-		debugLog(`[SJR] No word overlap match found (checked ${Object.keys(sjrRankings).length} entries)`);
+		debugLog(`[SJR] No word overlap match found (checked ${this.wordIndex.length} entries)`);
 		return null;
 	}
 };
@@ -139,7 +211,7 @@ DatabaseRegistry.register({
 	name: 'SCImago Journal Rankings',
 	prefKey: null,  // Always enabled
 	priority: 0,    // Checked first
-	matcher: function(title, debugLog) {
-		return SJRDatabase.match(title, debugLog);
+	matcher: function(title, debugLog, item) {
+		return SJRDatabase.match(title, debugLog, item);
 	}
 });

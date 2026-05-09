@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.3] - 2026-05-09
+- Improved ranking lookup and badge rendering performance while preserving matching rules.
+- Fixed duplicate menu entries when Zotero windows are initialized more than once.
+
 ## [0.3.2] - 2026-05-09
 - Added CAPES, ABDC, and SPELL ranking sources.
 - Added local Nova CAPES classification calculation.

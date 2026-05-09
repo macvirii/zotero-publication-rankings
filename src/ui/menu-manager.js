@@ -78,6 +78,7 @@ var MenuManager = {
 		
 		// Remove Tools menu items
 		this.removeElement(doc, 'zotero-rankings-update');
+		this.removeElement(doc, 'zotero-rankings-write-extra');
 		this.removeElement(doc, 'zotero-rankings-separator');
 		
 		// Remove context menu items
@@ -85,6 +86,7 @@ var MenuManager = {
 		this.removeElement(doc, 'zotero-rankings-context-debug');
 		this.removeElement(doc, 'zotero-rankings-context-manual');
 		this.removeElement(doc, 'zotero-rankings-context-clear');
+		this.removeElement(doc, 'zotero-rankings-context-write-extra');
 		this.removeElement(doc, 'zotero-rankings-context-separator');
 	},
 	
@@ -101,6 +103,10 @@ var MenuManager = {
 			Zotero.debug("Publication Rankings: Tools menu not found");
 			return;
 		}
+
+		this.removeElement(doc, 'zotero-rankings-update');
+		this.removeElement(doc, 'zotero-rankings-write-extra');
+		this.removeElement(doc, 'zotero-rankings-separator');
 		
 		// Add separator before our items for visual grouping
 		var separator = doc.createXULElement('menuseparator');
@@ -137,6 +143,13 @@ var MenuManager = {
 			Zotero.debug("Publication Rankings: Context menu not found");
 			return;
 		}
+
+		this.removeElement(doc, 'zotero-rankings-context-update');
+		this.removeElement(doc, 'zotero-rankings-context-debug');
+		this.removeElement(doc, 'zotero-rankings-context-manual');
+		this.removeElement(doc, 'zotero-rankings-context-clear');
+		this.removeElement(doc, 'zotero-rankings-context-write-extra');
+		this.removeElement(doc, 'zotero-rankings-context-separator');
 		
 		// Add separator
 		var separator = doc.createXULElement('menuseparator');
@@ -266,6 +279,14 @@ var MenuManager = {
 	 * @private
 	 */
 	removeElement: function(doc, id) {
+		var elements = doc.querySelectorAll ? doc.querySelectorAll('#' + id) : [];
+		if (elements && elements.length) {
+			for (var i = elements.length - 1; i >= 0; i--) {
+				elements[i].remove();
+			}
+			return;
+		}
+
 		var element = doc.getElementById(id);
 		if (element) {
 			element.remove();
