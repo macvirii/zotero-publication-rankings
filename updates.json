@@ -3,12 +3,12 @@
 		"publication-rankings@zotero.org": {
 			"updates": [
 				{
-					"version": "0.3.0",
-					"update_link": "https://github.com/ben-AI-cybersec/zotero-publication-rankings/releases/download/v0.3.0/publication-rankings-0.3.0.xpi",
+					"version": "0.3.1",
+					"update_link": "https://github.com/ben-AI-cybersec/zotero-publication-rankings/releases/download/v0.3.1/publication-rankings-0.3.1.xpi",
 					"applications": {
 						"zotero": {
 							"strict_min_version": "7.0",
-							"strict_max_version": "8.*"
+							"strict_max_version": "9.*"
 						}
 					}
 				}

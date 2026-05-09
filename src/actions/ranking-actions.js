@@ -18,7 +18,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* global Zotero, RankingEngine, ManualOverrides, ColumnManager, Services, ChromeUtils */
+/* global Zotero, RankingEngine, ManualOverrides, ColumnManager, Services */
 
 /**
  * Ranking Actions - Handles all user-triggered operations
@@ -237,8 +237,11 @@ var RankingActions = {
 		var existingOverride = ManualOverrides.get(publicationTitle);
 		var defaultValue = existingOverride || '';
 		
-		// Prompt for ranking using modern Services API
-		var Services = globalThis.Services || ChromeUtils.import("resource://gre/modules/Services.jsm").Services;
+		// Zotero exposes Services in the bootstrap scope. Manual Services.jsm imports
+		// are not supported on newer Mozilla runtimes used by Zotero 8+.
+		if (typeof Services === 'undefined') {
+			throw new Error('Services global is not available');
+		}
 		
 		var input = { value: defaultValue };
 		var result = Services.prompt.prompt(
@@ -610,4 +613,3 @@ var RankingActions = {
 		}
 	}
 };
-

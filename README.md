@@ -1,4 +1,4 @@
-# Publication Rankings for Zotero 7
+# Publication Rankings for Zotero 7+
 
 [![GitHub release](https://img.shields.io/github/v/release/ben-AI-cybersec/zotero-publication-rankings?style=for-the-badge)](https://github.com/ben-AI-cybersec/zotero-publication-rankings/releases/latest) [![Downloads](https://img.shields.io/github/downloads/ben-AI-cybersec/zotero-publication-rankings/total?style=for-the-badge&color=forestgreen)](https://github.com/ben-AI-cybersec/zotero-publication-rankings/releases) [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg?style=for-the-badge)](https://www.gnu.org/licenses/gpl-3.0)
 
@@ -31,7 +31,7 @@ A Zotero plugin that automatically displays journal and conference rankings in a
 ## Installation
 
 1. Download the latest `publication-rankings-*.xpi` from the [releases page](https://github.com/ben-AI-cybersec/zotero-publication-rankings/releases/latest)
-2. In Zotero 7: Tools → Add-ons → ⚙️ → "Install Add-on From File..."
+2. In Zotero: Tools → Add-ons → ⚙️ → "Install Add-on From File..."
 3. Select the `.xpi` file and restart Zotero
 4. Right-click column headers and enable the "Ranking" column
 

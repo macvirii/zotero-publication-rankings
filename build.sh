@@ -1,6 +1,6 @@
 #!/bin/bash
 # Build script to create Zotero plugin XPI file
-# Publication Rankings Plugin for Zotero 7
+# Publication Rankings Plugin for Zotero 7+
 #
 # Copyright (C) 2025 Ben Stephens
 # Licensed under GNU General Public License v3.0 (GPLv3)
@@ -8,7 +8,7 @@
 # XPI files are just ZIP files with a different extension
 
 pluginName="publication-rankings"
-version="0.3.0"
+version="0.3.1"
 outputFile="${pluginName}-${version}.xpi"
 
 # Remove old XPI if it exists
@@ -98,8 +98,10 @@ elif command -v 7z &> /dev/null; then
     7z a -tzip "$pluginDir/$outputFile" . > /dev/null
 elif command -v jar &> /dev/null; then
     jar cf "$pluginDir/$outputFile" .
+elif command -v python3 &> /dev/null; then
+    python3 -m zipfile -c "$pluginDir/$outputFile" .
 else
-    echo -e "\033[0;31mError: No zip utility found. Please install zip, 7zip, or use Java's jar command.\033[0m"
+    echo -e "\033[0;31mError: No zip utility found. Please install zip, 7zip, Java's jar command, or Python 3.\033[0m"
     exit 1
 fi
 
@@ -110,7 +112,7 @@ fileSize=$(stat -c%s "$outputFile" 2>/dev/null || stat --format=%s "$outputFile"
 fileSizeMB=$(awk "BEGIN {printf \"%.2f\", $fileSize/1024/1024}")
 echo -e "\n\033[0;32mSuccess! Created $outputFile ($fileSizeMB MB)\033[0m"
 echo -e "\nTo install:"
-echo "1. Open Zotero 7"
+echo "1. Open Zotero"
 echo "2. Go to Tools -> Add-ons"
 echo "3. Click the gear icon -> 'Install Add-on From File...'"
 echo "4. Select the $outputFile file"

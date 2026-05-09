@@ -23,7 +23,6 @@
  */
 
 /* global Services, Components, Hooks, Zotero */
-var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 /**
  * Load all plugin modules in dependency order
