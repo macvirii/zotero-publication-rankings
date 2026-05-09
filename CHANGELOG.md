@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-05-09
+- Added CAPES, ABDC, and SPELL ranking sources.
+- Added local Nova CAPES classification calculation.
+
 ## [0.3.1] - 2026-05-09
 - Updated compatibility metadata for Zotero 9.
 - Removed manual `Services.jsm` imports for newer Zotero/Mozilla runtimes.
