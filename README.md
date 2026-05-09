@@ -1,8 +1,10 @@
-# Publication Rankings for Zotero 7+
+# Publication Rankings for Zotero 9
 
 [![GitHub release](https://img.shields.io/github/v/release/macvirii/zotero-publication-rankings.svg?style=for-the-badge)](https://github.com/macvirii/zotero-publication-rankings/releases/latest) [![Downloads](https://img.shields.io/github/downloads/macvirii/zotero-publication-rankings/total.svg?style=for-the-badge&color=forestgreen&cacheSeconds=3600)](https://github.com/macvirii/zotero-publication-rankings/releases) [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg?style=for-the-badge)](https://www.gnu.org/licenses/gpl-3.0)
 
 A Zotero plugin that automatically displays journal and conference rankings in a custom column in your Zotero library.
+
+This fork has been validated only on Zotero 9.
 
 ## Fork Notice
 
