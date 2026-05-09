@@ -15,7 +15,7 @@ var UIUtils = {
 	getRankingColor: function(id, ranking) {
 		if (!ranking) return null;
 
-		switch (id) {
+			switch (id) {
 			case "sjr":
 				// SJR Quartiles (Green to Red gradient)
 				if (ranking.startsWith('Q1')) {
@@ -82,6 +82,22 @@ var UIUtils = {
 				break;
 			case "ft50":
 				return '#2E7D32'; // Dark Green
+			case "qualisCapes":
+				if (ranking.startsWith('A1')) return '#2E7D32';
+				if (ranking.startsWith('A2')) return '#388E3C';
+				if (ranking.startsWith('A3')) return '#0288D1';
+				if (ranking.startsWith('A4')) return '#1976D2';
+				if (ranking.startsWith('B1') || ranking.startsWith('B2')) return '#F57C00';
+				if (ranking.startsWith('B3') || ranking.startsWith('B4')) return '#D32F2F';
+				if (ranking.startsWith('C')) return '#757575';
+				break;
+			case "capesNova":
+				if (ranking === 'MB') return '#2E7D32';
+				if (ranking === 'B') return '#0288D1';
+				if (ranking === 'R') return '#F57C00';
+				if (ranking === 'F') return '#D32F2F';
+				if (ranking === 'I') return '#757575';
+				break;
 
 			default:
 				// Default for other rankings (TBR, Unranked, etc.)
@@ -98,7 +114,7 @@ var UIUtils = {
 	getRankingSortValue: function (id, ranking) {
 		if ((!ranking) || (ranking == 'N/A')) return 0;
 
-		switch (id) {
+			switch (id) {
 			case "sjr":
 			case "core":
 				// CORE A* = highest
@@ -141,6 +157,24 @@ var UIUtils = {
 				if (ranking.startsWith('2')) return 246;
 				if (ranking.startsWith('1')) return 245;
 
+				break;
+			case "qualisCapes":
+				if (ranking.startsWith('A1')) return 980;
+				if (ranking.startsWith('A2')) return 960;
+				if (ranking.startsWith('A3')) return 940;
+				if (ranking.startsWith('A4')) return 920;
+				if (ranking.startsWith('B1')) return 800;
+				if (ranking.startsWith('B2')) return 780;
+				if (ranking.startsWith('B3')) return 760;
+				if (ranking.startsWith('B4')) return 740;
+				if (ranking.startsWith('C')) return 100;
+				break;
+			case "capesNova":
+				if (ranking === 'MB') return 980;
+				if (ranking === 'B') return 800;
+				if (ranking === 'R') return 500;
+				if (ranking === 'F') return 300;
+				if (ranking === 'I') return 50;
 				break;
 			default:
 				// Other/Unknown rankings
@@ -188,7 +222,7 @@ var UIUtils = {
 	getRankingDescription: function(id, ranking) {
 		if (!ranking) return 'No ranking found';
 
-		switch (id) {
+			switch (id) {
 			case "core":
 				// CORE rankings
 				if (ranking === 'A*') return 'CORE A* - Flagship conference';
@@ -211,11 +245,32 @@ var UIUtils = {
 				if (ranking === '3') return 'ABS 3';
 				if (ranking === '2') return 'ABS 2';
 				if (ranking === '1') return 'ABS 1';
+				break;
 			case "ft50":
 				// FT50
 				return 'Financial Times 50 journal ranking';
+			case "qualisCapes":
+				return 'Qualis CAPES 2021-2024 ' + ranking;
+			case "capesNova":
+				if (ranking === 'MB') return 'Nova CAPES MB - Muito Bom (8 points)';
+				if (ranking === 'B') return 'Nova CAPES B - Bom (4 points)';
+				if (ranking === 'R') return 'Nova CAPES R - Regular (2 points)';
+				if (ranking === 'F') return 'Nova CAPES F - Fraco (1 point)';
+				if (ranking === 'I') return 'Nova CAPES I - Insuficiente (0 points)';
 		}
 		return ranking;
+	},
+
+	getDatabaseLabel: function(id) {
+		switch (id) {
+			case "sjr": return "SJR";
+			case "core": return "CORE";
+			case "abs": return "ABS";
+			case "ft50": return "FT50";
+			case "qualisCapes": return "Qualis CAPES";
+			case "capesNova": return "Nova CAPES";
+			default: return id ? id.toUpperCase() : '';
+		}
 	},
 
 	/**

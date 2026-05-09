@@ -1,6 +1,12 @@
 import csv
 import json
 import os
+import re
+
+
+def normalize_issn(value):
+    cleaned = re.sub(r'[^0-9Xx]', '', value or '').upper()
+    return cleaned if len(cleaned) == 8 else ''
 
 def extract_sjr_rankings(csv_file_path, output_file='sjr_rankings.json'):
     """
@@ -23,6 +29,10 @@ def extract_sjr_rankings(csv_file_path, output_file='sjr_rankings.json'):
             title = row['Title'].strip('"').strip().lower()
             sjr_value = row['SJR'].strip()
             quartile = row['SJR Best Quartile'].strip()
+            issns = [
+                issn for issn in [normalize_issn(part) for part in row.get('Issn', '').split(',')]
+                if issn
+            ]
 
             # Convert SJR value from string to float, handling comma as decimal separator
             try:
@@ -30,7 +40,8 @@ def extract_sjr_rankings(csv_file_path, output_file='sjr_rankings.json'):
                 # Store both SJR and quartile
                 sjr_dict[title] = {
                     'sjr': sjr_float,
-                    'quartile': quartile if quartile else '-'
+                    'quartile': quartile if quartile else '-',
+                    'issns': issns
                 }
             except ValueError:
                 print(f"Warning: Could not convert SJR value '{sjr_value}' for journal '{title}'")
@@ -58,7 +69,7 @@ def generate_javascript_dict(sjr_dict, output_file='sjr_rankings.js'):
         for i, (title, data) in enumerate(sorted(sjr_dict.items())):
             # Add comma for all lines except the last one
             comma = ',' if i < len(sjr_dict) - 1 else ''
-            f.write(f'    "{title}": {{sjr: {data["sjr"]}, quartile: "{data["quartile"]}"}}{comma}\n')
+            f.write(f'    "{title}": {{sjr: {data["sjr"]}, quartile: "{data["quartile"]}", issns: {json.dumps(data.get("issns", []))}}}{comma}\n')
         
         f.write('};\n')
     

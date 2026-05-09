@@ -9,7 +9,7 @@
  * - name: Display name
  * - prefKey: Preference key (null = always enabled)
  * - priority: Lower numbers checked first (0 = highest priority)
- * - matcher: Function(title, debugLog) that returns ranking or null
+ * - matcher: Function(title, debugLog, item) that returns ranking or null
  */
 
 var DatabaseRegistry = {
@@ -27,7 +27,7 @@ var DatabaseRegistry = {
 	 * @param {string} config.name - Display name (e.g., 'SCImago Journal Rankings')
 	 * @param {string|null} config.prefKey - Preference key to enable/disable (null = always enabled)
 	 * @param {number} config.priority - Priority order (lower = checked first, 0 = highest)
-	 * @param {Function} config.matcher - Matching function(title, debugLog) returns ranking or null
+	 * @param {Function} config.matcher - Matching function(title, debugLog, item) returns ranking or null
 	 */
 	register: function(config) {
 		if (!config.id || !config.name || !config.matcher) {

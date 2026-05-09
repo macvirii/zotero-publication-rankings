@@ -155,8 +155,8 @@ var ColumnManager = {
 				let b = {
 					color: e[2],
 					text: !e[1] || e[1].trim() === '' ?
-						' ' + e[0].toUpperCase().trim() + ' ' :
-						e[0].toUpperCase().trim() + ': ' + e[1].trim()
+						' ' + UIUtils.getDatabaseLabel(e[0]).trim() + ' ' :
+						UIUtils.getDatabaseLabel(e[0]).trim() + ': ' + e[1].trim()
 				};
 				bItems.push(b);
 			});
@@ -330,7 +330,7 @@ var ColumnManager = {
 				// Parse comma-separated format: "database,ranking,color"
 				var fields = entry.split(',');
 				if (fields.length >= 2) {
-					var db = fields[0].toUpperCase();
+					var db = UIUtils.getDatabaseLabel(fields[0]);
 					var rank = fields[1].trim();
 					parts.push(db + ': ' + rank);
 				}

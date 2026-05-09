@@ -1,0 +1,448 @@
+{
+  "byTitle": {
+    "revista de administração contemporânea": {
+      "spell": "top10",
+      "rank": 1
+    },
+    "revista contabilidade & finanças": {
+      "spell": "top10",
+      "rank": 2
+    },
+    "revista brasileira de pesquisa em turismo": {
+      "spell": "top10",
+      "rank": 3
+    },
+    "revista de administração de empresas": {
+      "spell": "top10",
+      "rank": 4
+    },
+    "revista de administração mackenzie": {
+      "spell": "top10",
+      "rank": 5
+    },
+    "revista de administração pública": {
+      "spell": "top10",
+      "rank": 6
+    },
+    "revista de contabilidade e organizações": {
+      "spell": "top10",
+      "rank": 7
+    },
+    "organizações & sociedade": {
+      "spell": "top10",
+      "rank": 8
+    },
+    "brazilian business review": {
+      "spell": "top10",
+      "rank": 9
+    },
+    "cadernos ebape.br": {
+      "spell": "top10",
+      "rank": 10
+    },
+    "advances in scientific and applied accounting": {
+      "spell": "top10",
+      "rank": 11
+    },
+    "revista catarinense da ciência contábil": {
+      "spell": "top10",
+      "rank": 12
+    },
+    "revista contemporânea de contabilidade": {
+      "spell": "next30",
+      "rank": 13
+    },
+    "revista gestão organizacional": {
+      "spell": "next30",
+      "rank": 14
+    },
+    "revista de educação e pesquisa em contabilidade": {
+      "spell": "next30",
+      "rank": 15
+    },
+    "revista brasileira de gestão de negócios": {
+      "spell": "next30",
+      "rank": 16
+    },
+    "read. revista eletrônica de administração": {
+      "spell": "next30",
+      "rank": 17
+    },
+    "revista eletrônica de ciência administrativa": {
+      "spell": "next30",
+      "rank": 18
+    },
+    "revista de ciências da administração": {
+      "spell": "next30",
+      "rank": 19
+    },
+    "regepe entrepreneurship and small business": {
+      "spell": "next30",
+      "rank": 20
+    },
+    "rausp management journal": {
+      "spell": "next30",
+      "rank": 21
+    },
+    "revista enfoque: reflexão contábil": {
+      "spell": "next30",
+      "rank": 22
+    },
+    "revista gestão & conexões": {
+      "spell": "next30",
+      "rank": 23
+    },
+    "rege - revista de gestão": {
+      "spell": "next30",
+      "rank": 24
+    },
+    "revista pensamento contemporâneo em administração": {
+      "spell": "next30",
+      "rank": 25
+    },
+    "brazilian administration review": {
+      "spell": "next30",
+      "rank": 26
+    },
+    "contabilidade vista & revista": {
+      "spell": "next30",
+      "rank": 27
+    },
+    "pensar contábil": {
+      "spell": "next30",
+      "rank": 28
+    },
+    "future studies research journal: trends and strategies": {
+      "spell": "next30",
+      "rank": 29
+    },
+    "sociedade, contabilidade e gestão": {
+      "spell": "next30",
+      "rank": 30
+    },
+    "cadernos gestão pública e cidadania": {
+      "spell": "next30",
+      "rank": 31
+    },
+    "contextus - revista contemporânea de economia e gestão": {
+      "spell": "next30",
+      "rank": 32
+    },
+    "turismo: visão e ação": {
+      "spell": "next30",
+      "rank": 33
+    },
+    "revista mineira de contabilidade": {
+      "spell": "next30",
+      "rank": 34
+    },
+    "revista de carreiras e pessoas": {
+      "spell": "next30",
+      "rank": 35
+    },
+    "administração pública e gestão social": {
+      "spell": "next30",
+      "rank": 36
+    },
+    "revista do serviço público": {
+      "spell": "next30",
+      "rank": 37
+    },
+    "revista de contabilidade e controladoria": {
+      "spell": "next30",
+      "rank": 38
+    },
+    "revista de gestão e projetos": {
+      "spell": "next30",
+      "rank": 39
+    },
+    "innovation and management review": {
+      "spell": "next30",
+      "rank": 40
+    },
+    "teoria e prática em administração": {
+      "spell": "next30",
+      "rank": 41
+    },
+    "journal of law and corruption review": {
+      "spell": "next30",
+      "rank": 42
+    },
+    "revista ciências administrativas": {
+      "spell": "next30",
+      "rank": 43
+    },
+    "revista ibero-americana de estratégia": {
+      "spell": "next30",
+      "rank": 44
+    },
+    "caderno virtual de turismo": {
+      "spell": "next30",
+      "rank": 45
+    },
+    "revista de administração faces journal": {
+      "spell": "next30_2",
+      "rank": 46
+    },
+    "contabilidade, gestão e governança": {
+      "spell": "next30_2",
+      "rank": 47
+    },
+    "turismo em análise": {
+      "spell": "next30_2",
+      "rank": 48
+    },
+    "revista administração em diálogo": {
+      "spell": "next30_2",
+      "rank": 49
+    },
+    "caderno de administração": {
+      "spell": "next30_2",
+      "rank": 50
+    },
+    "revista de contabilidade do mestrado em ciências contábeis da uerj (online)": {
+      "spell": "next30_2",
+      "rank": 51
+    },
+    "revista de turismo contemporâneo": {
+      "spell": "next30_2",
+      "rank": 52
+    },
+    "gestão & regionalidade": {
+      "spell": "next30_2",
+      "rank": 53
+    },
+    "marketing & tourism review": {
+      "spell": "next30_2",
+      "rank": 54
+    },
+    "desafio online": {
+      "spell": "next30_2",
+      "rank": 55
+    },
+    "podium sport, leisure and tourism review": {
+      "spell": "next30_2",
+      "rank": 56
+    },
+    "sinergia": {
+      "spell": "next30_2",
+      "rank": 57
+    },
+    "revista rosa dos ventos - turismo e hospitalidade": {
+      "spell": "next30_2",
+      "rank": 58
+    },
+    "revista organizações em contexto": {
+      "spell": "next30_2",
+      "rank": 59
+    },
+    "revista brasileira de inovação": {
+      "spell": "next30_2",
+      "rank": 60
+    },
+    "revista economia & gestão": {
+      "spell": "next30_2",
+      "rank": 61
+    },
+    "anais brasileiros de estudos turísticos": {
+      "spell": "next30_2",
+      "rank": 62
+    },
+    "revista brasileira de finanças": {
+      "spell": "next30_2",
+      "rank": 63
+    },
+    "revista alcance": {
+      "spell": "next30_2",
+      "rank": 64
+    },
+    "revista de administração, sociedade e inovação": {
+      "spell": "next30_2",
+      "rank": 65
+    },
+    "revista pretexto": {
+      "spell": "next30_2",
+      "rank": 66
+    },
+    "revista gestão & planejamento": {
+      "spell": "next30_2",
+      "rank": 67
+    },
+    "revista de administração da ufsm": {
+      "spell": "next30_2",
+      "rank": 68
+    },
+    "revista brasileira de marketing": {
+      "spell": "next30_2",
+      "rank": 69
+    },
+    "gestão e desenvolvimento": {
+      "spell": "next30_2",
+      "rank": 70
+    },
+    "internext - international business and management review": {
+      "spell": "next30_2",
+      "rank": 71
+    },
+    "revista eletrônica de administração e turismo": {
+      "spell": "next30_2",
+      "rank": 72
+    },
+    "revista eletrônica de estratégia & negócios": {
+      "spell": "next30_2",
+      "rank": 73
+    },
+    "journal of sustainable competitive intelligence": {
+      "spell": "next30_2",
+      "rank": 74
+    },
+    "gestão.org - revista eletrônica de gestão organizacional": {
+      "spell": "next30_2",
+      "rank": 75
+    },
+    "reunir: revista de administração, contabilidade e sustentabilidade": {
+      "spell": "next30_2",
+      "rank": 76
+    },
+    "revista de administração, contabilidade e economia da fundace": {
+      "spell": "next30_2",
+      "rank": 77
+    },
+    "navus - revista de gestão e tecnologia": {
+      "spell": "next30_2",
+      "rank": 78
+    },
+    "revista interdisciplinar de marketing": {
+      "spell": "bottom30",
+      "rank": 79
+    },
+    "reuna": {
+      "spell": "bottom30",
+      "rank": 80
+    },
+    "revista da cgu": {
+      "spell": "bottom30",
+      "rank": 81
+    },
+    "desenvolvimento em questão": {
+      "spell": "bottom30",
+      "rank": 82
+    },
+    "contexto - revista do programa de pós-graduação em controladoria e contabilidade da ufrgs": {
+      "spell": "bottom30",
+      "rank": 83
+    },
+    "revista controle – doutrina e artigos": {
+      "spell": "bottom30",
+      "rank": 84
+    },
+    "revista inovação, projetos e tecnologias": {
+      "spell": "bottom30",
+      "rank": 85
+    },
+    "base - revista de administração e contabilidade da unisinos": {
+      "spell": "bottom30",
+      "rank": 86
+    },
+    "revista latino americana de turismologia": {
+      "spell": "bottom30",
+      "rank": 87
+    },
+    "revista gestão & tecnologia": {
+      "spell": "bottom30",
+      "rank": 88
+    },
+    "revista capital científico - eletrônica": {
+      "spell": "bottom30",
+      "rank": 89
+    },
+    "cenário revista interdisciplinar em turismo e território": {
+      "spell": "bottom30",
+      "rank": 90
+    },
+    "farol - revista de estudos organizacionais e sociedade": {
+      "spell": "bottom30",
+      "rank": 91
+    },
+    "revista brasileira de gestão e inovação": {
+      "spell": "bottom30",
+      "rank": 92
+    },
+    "revista eniac pesquisa": {
+      "spell": "bottom30",
+      "rank": 93
+    },
+    "amazônia, organizações e sustentabilidade": {
+      "spell": "bottom30",
+      "rank": 94
+    },
+    "international journal of innovation": {
+      "spell": "bottom30",
+      "rank": 95
+    },
+    "perspectivas em gestão & conhecimento": {
+      "spell": "bottom30",
+      "rank": 96
+    },
+    "gv-executivo": {
+      "spell": "bottom30",
+      "rank": 97
+    },
+    "revista hospitalidade": {
+      "spell": "bottom30",
+      "rank": 98
+    },
+    "práticas de administração pública": {
+      "spell": "bottom30",
+      "rank": 99
+    },
+    "organizações rurais & agroindustriais": {
+      "spell": "bottom30",
+      "rank": 100
+    },
+    "revista de gestão ambiental e sustentabilidade": {
+      "spell": "bottom30",
+      "rank": 101
+    },
+    "international journal of business & marketing": {
+      "spell": "bottom30",
+      "rank": 102
+    },
+    "journal of sustainable institutional management": {
+      "spell": "bottom30",
+      "rank": 103
+    },
+    "journal of perspectives in management": {
+      "spell": "bottom30",
+      "rank": 104
+    },
+    "revista liceu on-line": {
+      "spell": "bottom30",
+      "rank": 105
+    },
+    "estudos de administração e sociedade": {
+      "spell": "bottom30",
+      "rank": 106
+    },
+    "revista brasileira de políticas públicas e internacionais": {
+      "spell": "bottom30",
+      "rank": 107
+    },
+    "review of artificial intelligence in education": {
+      "spell": "bottom30",
+      "rank": 108
+    },
+    "gvcasos - revista brasileira de casos de ensino em administração": {
+      "spell": "bottom30",
+      "rank": 109
+    },
+    "journal of information systems and technology management": {
+      "spell": "bottom30",
+      "rank": 110
+    },
+    "cap accounting and management": {
+      "spell": "bottom30",
+      "rank": 111
+    }
+  }
+}

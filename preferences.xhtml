@@ -73,10 +73,40 @@
             <label value="Last Update:" />
             <label value="2012" />
         </html:div>
+        <!-- Qualis CAPES -->
+        <checkbox id="publication-rankings-enableQualisCapes"
+                  label="Qualis CAPES 2021-2024"
+                  preference="extensions.publication-rankings.enableQualisCapes" />
+        <description style="margin-left: 25px; margin-bottom: 10px;">
+            Official Qualis CAPES strata (A1-C), aggregated across all evaluation areas using the best available stratum for each journal.
+        </description>
+        <html:div style="margin-left: 25px; margin-bottom: 10px;">
+            <label value="Source:" />
+            <label value="CAPES XLSX file: classificações_publicadas_todas_as_areas_avaliacao1768259646562.xlsx" />
+        </html:div>
+        <html:div style="margin-left: 25px; margin-bottom: 20px;">
+            <label value="Last Update:" />
+            <label value="2021-2024" />
+        </html:div>
+        <!-- Nova CAPES -->
+        <checkbox id="publication-rankings-enableCapesNova"
+                  label="Nova Classificação CAPES (Área 27)"
+                  preference="extensions.publication-rankings.enableCapesNova" />
+        <description style="margin-left: 25px; margin-bottom: 10px;">
+            Local rule-based classification for Administração Pública e de Empresas, Ciências Contábeis e Turismo (MB, B, R, F, I) using ABDC, ABS, JCR, SJR, SPELL, and SciELO data when available.
+        </description>
+        <html:div style="margin-left: 25px; margin-bottom: 10px;">
+            <label value="Source:" />
+            <label is="zotero-text-link" value="CAPES methodology summary" href="https://periodicos-adm.com/sobre" />
+        </html:div>
+        <html:div style="margin-left: 25px; margin-bottom: 20px;">
+            <label value="Last Update:" />
+            <label value="2025-2028 methodology; local source datasets" />
+        </html:div>
     </vbox>
 
     <description style="margin-top: 10px; font-style: italic;">
-        Note: Additional databases (JCR, Qualis, ERA) may be added in future versions.
+        Note: JCR is considered by the Nova CAPES rule when a local jcr_rankings.json dataset is provided; no Clarivate dataset is bundled.
     </description>
 </groupbox>
 

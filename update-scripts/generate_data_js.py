@@ -1,5 +1,20 @@
 import json
 
+
+def load_json(path, description, required=True, default=None):
+    print(f"Loading {description}...")
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        print(f"  Loaded {description}")
+        return data
+    except FileNotFoundError:
+        if required:
+            print(f"  ERROR: {path} not found.")
+            raise
+        print(f"  WARNING: {path} not found. Using empty dataset.")
+        return default if default is not None else {}
+
 def generate_data_js():
     """
     Combines all rankings into the plugin's data.js file.
@@ -8,33 +23,62 @@ def generate_data_js():
     """
     
     # Load SJR rankings
-    print("Loading SJR rankings...")
     try:
-        with open('sjr_rankings.json', 'r', encoding='utf-8') as f:
-            sjr_rankings = json.load(f)
-        print(f"  Loaded {len(sjr_rankings)} SJR journal rankings")
+        sjr_rankings = load_json('sjr_rankings.json', 'SJR journal rankings')
+        print(f"  SJR journals: {len(sjr_rankings)}")
     except FileNotFoundError:
-        print("  ERROR: sjr_rankings.json not found. Run extract_sjr.py first.")
+        print("  Run extract_sjr.py first.")
         return
     
     # Load CORE rankings
-    print("Loading CORE rankings...")
     try:
-        with open('core_rankings.json', 'r', encoding='utf-8') as f:
-            core_rankings = json.load(f)
-        print(f"  Loaded {len(core_rankings)} CORE conference rankings")
+        core_rankings = load_json('core_rankings.json', 'CORE conference rankings')
+        print(f"  CORE conferences: {len(core_rankings)}")
     except FileNotFoundError:
-        print("  ERROR: core_rankings.json not found. Run extract_full_core.py first.")
+        print("  Run extract_full_core.py first.")
         return
 
     # Load ABS rankings
-    print("Loading ABS rankings...")
     try:
-        with open('abs_rankings.json', 'r', encoding='utf-8') as f:
-            abs_rankings = json.load(f)
-        print(f"  Loaded {len(abs_rankings)} ABS journal rankings")
+        abs_rankings = load_json('abs_rankings.json', 'ABS journal rankings')
+        print(f"  ABS journals: {len(abs_rankings)}")
     except FileNotFoundError:
-        print("  ERROR: abs_rankings.json not found. Run extract_abs.py first.")
+        print("  Run extract_abs.py first.")
+        return
+
+    try:
+        qualis_capes_rankings = load_json('qualis_capes_2021_2024_rankings.json', 'Qualis CAPES 2021-2024 rankings')
+        print(f"  Qualis titles: {len(qualis_capes_rankings.get('byTitle', {}))}")
+    except FileNotFoundError:
+        print("  Run extract_qualis_capes.py first.")
+        return
+
+    try:
+        abdc_rankings = load_json('abdc_rankings.json', 'ABDC rankings')
+        print(f"  ABDC titles: {len(abdc_rankings.get('byTitle', {}))}")
+    except FileNotFoundError:
+        print("  Run extract_abdc.py first.")
+        return
+
+    jcr_rankings = load_json(
+        'jcr_rankings.json',
+        'JCR rankings',
+        required=False,
+        default={'byTitle': {}, 'byIssn': {}}
+    )
+
+    try:
+        spell_rankings = load_json('spell_rankings.json', 'SPELL rankings')
+        print(f"  SPELL titles: {len(spell_rankings.get('byTitle', {}))}")
+    except FileNotFoundError:
+        print("  Run extract_spell.py first.")
+        return
+
+    try:
+        scielo_rankings = load_json('scielo_rankings.json', 'SciELO rankings')
+        print(f"  SciELO titles: {len(scielo_rankings.get('byTitle', {}))}")
+    except FileNotFoundError:
+        print("  Run extract_scielo.py first.")
         return
     
     # Load FT50 rankings
@@ -55,8 +99,8 @@ def generate_data_js():
     
     with open(output_path, 'w', encoding='utf-8') as f:
         # Write header
-        f.write('// Combined SJR Journal Rankings and CORE Conference Rankings\n')
-        f.write('// Auto-generated data file from extract_core.py and extract_sjr.py\n')
+        f.write('// Combined publication ranking datasets\n')
+        f.write('// Auto-generated data file from update-scripts/extract_*.py\n')
         f.write('// Use this with rankings.js\n')
         f.write('\n')
 
@@ -80,6 +124,38 @@ def generate_data_js():
         f.write('var absRankings = ')
         json.dump(abs_rankings, f, indent=2, ensure_ascii=False)
         f.write(';\n\n')
+
+        # Write Qualis CAPES rankings
+        f.write('// Qualis CAPES Rankings (2021-2024)\n')
+        f.write('// Total journal titles: ' + str(len(qualis_capes_rankings.get('byTitle', {}))) + '\n')
+        f.write('var qualisCapes2021Rankings = ')
+        json.dump(qualis_capes_rankings, f, indent=2, ensure_ascii=False)
+        f.write(';\n\n')
+
+        # Write CAPES source rankings
+        f.write('// ABDC Journal Quality List (2025)\n')
+        f.write('// Total journal titles: ' + str(len(abdc_rankings.get('byTitle', {}))) + '\n')
+        f.write('var abdcRankings = ')
+        json.dump(abdc_rankings, f, indent=2, ensure_ascii=False)
+        f.write(';\n\n')
+
+        f.write('// JCR Rankings\n')
+        f.write('// Total journal titles: ' + str(len(jcr_rankings.get('byTitle', {}))) + '\n')
+        f.write('var jcrRankings = ')
+        json.dump(jcr_rankings, f, indent=2, ensure_ascii=False)
+        f.write(';\n\n')
+
+        f.write('// SPELL Rankings (2024 impact percentiles)\n')
+        f.write('// Total journal titles: ' + str(len(spell_rankings.get('byTitle', {}))) + '\n')
+        f.write('var spellRankings = ')
+        json.dump(spell_rankings, f, indent=2, ensure_ascii=False)
+        f.write(';\n\n')
+
+        f.write('// SciELO Brasil Current Journals\n')
+        f.write('// Total journal titles: ' + str(len(scielo_rankings.get('byTitle', {}))) + '\n')
+        f.write('var scieloRankings = ')
+        json.dump(scielo_rankings, f, indent=2, ensure_ascii=False)
+        f.write(';\n\n')
     
         # Write FT50 rankings
         # **** Note that ft_50_rankings is not a json formated string ****
@@ -100,7 +176,12 @@ def generate_data_js():
     print(f"  CORE conferences: {len(core_rankings):,}")
     print(f"  ABS journals: {len(abs_rankings):,}")
     print(f"  FT50 journals: {len(ft_50_rankings.splitlines()) - 2}")
-    print(f"  Total entries: {len(sjr_rankings) + len(core_rankings) + len(abs_rankings) + len(ft_50_rankings.splitlines()) - 2:,}")
+    print(f"  Qualis titles: {len(qualis_capes_rankings.get('byTitle', {})):,}")
+    print(f"  ABDC titles: {len(abdc_rankings.get('byTitle', {})):,}")
+    print(f"  JCR titles: {len(jcr_rankings.get('byTitle', {})):,}")
+    print(f"  SPELL titles: {len(spell_rankings.get('byTitle', {})):,}")
+    print(f"  SciELO titles: {len(scielo_rankings.get('byTitle', {})):,}")
+    print(f"  Total entries: {len(sjr_rankings) + len(core_rankings) + len(abs_rankings) + len(qualis_capes_rankings.get('byTitle', {})) + len(abdc_rankings.get('byTitle', {})) + len(jcr_rankings.get('byTitle', {})) + len(spell_rankings.get('byTitle', {})) + len(scielo_rankings.get('byTitle', {})) + len(ft_50_rankings.splitlines()) - 2:,}")
     
     print("\nNext steps:")
     print("  1. cd zotero-rankings-plugin")

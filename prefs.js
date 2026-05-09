@@ -20,6 +20,12 @@ pref("extensions.publication-rankings.enableABS", true);
 // Enable FT50 journal rankings
 pref("extensions.publication-rankings.enableFT50", true);
 
+// Enable Qualis CAPES 2021-2024 journal rankings
+pref("extensions.publication-rankings.enableQualisCapes", true);
+
+// Enable Nova Classificacao CAPES journal rankings
+pref("extensions.publication-rankings.enableCapesNova", true);
+
 // Disable Badges
 pref("extensions.publication-rankings.enableBadges", false);
 

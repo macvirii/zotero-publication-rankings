@@ -79,7 +79,7 @@ var RankingEngine = {
 				var db = databases[i];
 				debugLog(`Trying database: ${db.name} (priority ${db.priority})`);
 				
-				var rank = db.matcher(normalizedTitle, debugLog);
+				var rank = db.matcher(normalizedTitle, debugLog, item);
 				debugLog(`Matcher in ${db.name} return rank: ${rank}`);
 				if (rank) {
 					debugLog(`✓ FOUND in ${db.name}: ${rank}`);
@@ -96,7 +96,13 @@ var RankingEngine = {
 						case 'ft50':
 							rank = 'FT50';
 							break;
-                    }
+						case 'qualisCapes':
+							rank = 'Qualis CAPES: ' + rank;
+							break;
+						case 'capesNova':
+							rank = 'Nova CAPES: ' + rank;
+							break;
+					}
 
 					ranking = rank + ' ' + ranking;
 					debugLog(`Ranking = ${ranking}`);
@@ -173,7 +179,7 @@ var RankingEngine = {
 				var db = databases[i];
 				debugLog(`Trying database: ${db.name} (priority ${db.priority})`);
 
-				var rank = db.matcher(normalizedTitle, debugLog);
+				var rank = db.matcher(normalizedTitle, debugLog, item);
 				if (rank) {
 					debugLog(`✓ FOUND in ${db.name}: ${rank}`);
 					var a = [db.id, rank, UIUtils.getRankingColor(db.id, rank)];
