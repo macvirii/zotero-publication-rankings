@@ -1,149 +1,119 @@
 # Installation Guide
 
-## Publication Rankings for Zotero 7+
+## Publication Rankings for Zotero 9
 
-**Author:** Ben Stephens  
+**Original author:** Ben Stephens  
+**Fork maintainer:** macvirii  
 **License:** GNU General Public License v3.0 (GPLv3)  
-**Repository:** https://github.com/ben-AI-cybersec/zotero-publication-rankings
+**Repository:** https://github.com/macvirii/zotero-publication-rankings
+
+This fork has been validated only on Zotero 9.
 
 ## Quick Start
 
-1. **Download the Plugin**
-   - The plugin file is: `publication-rankings-x.x.x.xpi`
-
-2. **Install in Zotero**
-   - Open Zotero
-   - Go to **Tools → Add-ons** (or press Ctrl+Shift+A)
-   - Click the **gear icon** (⚙️) in the top-right corner
-   - Select **"Install Add-on From File..."**
-   - Navigate to and select `publication-rankings-x.x.x.xpi`
-   - Click **"Install Now"** when prompted
-   - Restart Zotero if required
-
-3. **Use the Plugin**
-   
-   **Automatic Mode (Default):**
-   - Simply add new items to your library (via browser, DOI, PDF, etc.)
-   - Rankings automatically appear in the custom "Ranking" column
-   - Right-click column headers to show/hide the Ranking column
-   - Works silently in the background
-   
-   **Manual Mode:**
-   - Select one or more items in your Zotero library
-   - Go to **Tools → Check Publication Rankings**
-   - Wait for the update to complete
-   - Check the "Ranking" column to see the results
+1. Download the latest `publication-rankings-*.xpi` from https://github.com/macvirii/zotero-publication-rankings/releases/latest.
+2. Open Zotero.
+3. Go to **Tools → Add-ons**.
+4. Click the gear icon and select **Install Add-on From File...**.
+5. Select the downloaded `.xpi` file.
+6. Restart Zotero if prompted.
+7. Right-click the item table column headers and enable the **Ranking** column.
 
 ## What Gets Displayed
 
-The plugin displays rankings in a custom "Ranking" column with:
+The plugin displays enabled ranking sources in a custom **Ranking** column.
 
-### Journal Rankings (from SJR 2024)
-- Format: `Q1 18.288`, `Q2 1.423`, `Q3 0.628`, `Q4 0.145`
-- 30,818+ journals covered
+### Journal Sources
 
-### Conference Rankings (from CORE)
-- Format: `A*`, `A`, `B`, `C`
-- For older rankings: `B [2018]`, `C [2014]`
-- Australasian: `Au A`, `Au B`, `Au C`
-- National: `Nat US`, `Nat AU`, etc.
-- Other: `TBR` (To Be Ranked), `Unranked`
-- 2,107+ conferences covered
+- **SJR 2024**: `Q1 18.288`, `Q2 1.423`, `Q3 0.628`, `Q4 0.145`
+- **ABS 2024**: `1`, `2`, `3`, `4`, `4*`
+- **ABDC 2025**: `A*`, `A`, `B`, `C`
+- **Qualis CAPES 2021-2024**: `A1`, `A2`, `A3`, `A4`, `B1`, `B2`, `B3`, `B4`, `C`
+- **Nova CAPES**: `MB`, `B`, `R`, `F`, `I`, calculated locally from available source datasets
+- **SPELL 2024**: `Top 10%`, `10-40%`, `40-70%`, `70-100%`
+- **FT50**: `FT50`
 
-### CABS ABS Rankings (2024)
-- Format: `1`, `2`, `3`, `4`, `4*`
-- 1,822 journals
+### Conference Sources
 
-### Financial Times 50 Journal Rank (FT50)
-- Format: `FT50`
-- 50 Journals
+- **CORE 2023 plus historical data**: `A*`, `A`, `B`, `C`, vintage values such as `B [2018]`, Australasian values such as `Au A`, and national values such as `Nat US`
 
-## Matching Algorithm
+## Common Actions
 
-The plugin uses 8 different fuzzy matching strategies:
-1. Exact title matching
-2. Acronym extraction and matching
-3. Normalized text comparison
-4. Substring matching
-5. Word overlap analysis (70-80% threshold)
-6. Conference title cleaning (removes years, ordinals)
-7. Multiple field checking (publicationTitle, proceedingsTitle, conferenceName)
+- **Automatic display**: Rankings appear when you view items if auto-update is enabled.
+- **Manual check**: Select items, then use **Tools → Check Publication Rankings** or the right-click context menu.
+- **Debug matching**: Enable debug mode in preferences, then right-click selected items and choose **Debug Ranking Match**. Check Zotero Debug Output for lines beginning with `[MATCH DEBUG]`.
+- **Manual override**: Right-click selected items and choose **Set Manual Ranking...** or **Clear Manual Ranking**.
+- **Extra field export**: Right-click selected items or use the Tools menu and choose **Write Rankings to Extra Field**.
 
-## Configuration
+## Preferences
 
-### Disable Auto-Update
+Open **Edit → Settings** or **Zotero → Settings** on macOS, then select **Rankings**.
 
-If you prefer to only update rankings manually:
-
-1. Go to **Edit → Settings** (or **Zotero → Settings** on Mac)
-2. Click **Rankings** tab in the preferences
-3. Uncheck "Automatically update rankings when items are added or modified"
-
-Alternatively, using Config Editor:
-1. Go to **Edit → Settings** (or **Zotero → Settings** on Mac)
-2. Click **Advanced** tab
-3. Click **Config Editor** button
-4. Search for: `extensions.publication-rankings.autoUpdate`
-5. Double-click the entry to change it to `false`
-
-To re-enable, change it back to `true`.
-
-## Troubleshooting
-
-**"Not found" items**
-- Workshops, regional conferences, or local journals may not be in the databases
-- Check if the publication title exactly matches database entries
-- Manual updates may be needed for obscure venues
-
-**No menu item appears**
-- Known issue
-
-**Plugin doesn't update items**
-- Verify items have a publication title, proceedings title, or conference name
-- The plugin only works on regular items (not attachments or notes)
-- Select items before running the update
+- Enable or disable CORE, ABS, ABDC, FT50, Qualis CAPES, Nova CAPES, and SPELL.
+- SJR is always enabled.
+- Toggle badge display instead of colored text.
+- Toggle automatic ranking updates.
+- Enable debug mode for detailed matching logs.
 
 ## Rebuilding from Source
 
-If you want to modify the plugin:
+Build output is written to `dist/publication-rankings-<version>.xpi`.
 
-1. Edit the files:
-   - `manifest.json` - Plugin metadata
-   - `bootstrap.js` - Lifecycle hooks
-   - `rankings.js` - Main plugin logic
-   - `data.js` - Ranking data (generated from CSV files)
+### Windows
 
-2. Run the build script:
-   ```powershell
-   .\build.ps1
-   ```
+```powershell
+.\build.ps1
+```
 
-3. Install the newly created `.xpi` file
+### Linux/macOS/WSL
+
+```bash
+./build.sh
+```
+
+The build scripts copy root plugin files plus modules from `src/` into a temporary directory, flatten the JavaScript modules into the XPI root, and package the result as an `.xpi` file.
 
 ## Data Updates
 
-To update the ranking data:
+Source CSV/XLSX files live in `update-scripts/source-data/`. Generated intermediate JSON files live in `update-scripts/`. The combined runtime data file is `src/data/data.js`.
 
-1. Download new CSV files:
-   - SJR: https://www.scimagojr.com/journalrank.php
-   - CORE: http://portal.core.edu.au/conf-ranks/
-   - ABS: https://journalranking.org
-   - FT50: https://www.ft.com/content/3405a512-5cbb-11e1-8f1f-00144feabdc0
+To regenerate all data after updating source files:
 
-2. Run the Python generator:
-   ```python
-   python generate_data_js.py
-   ```
+```bash
+cd update-scripts
+python extract_sjr.py
+python extract_full_core.py
+python extract_abs.py source-data/ABSRanking2024_Fulllist.csv
+python extract_abdc.py source-data/ABDC-JQL-2025-v1-260326.xlsx
+python extract_qualis_capes.py source-data/classificações_publicadas_todas_as_areas_avaliacao1768259646562.xlsx
+python extract_spell.py
+python extract_scielo.py
+python extract_ft_50.py source-data/FT50_FullList.csv
+python generate_data_js.py
+```
 
-3. Rebuild the plugin with `.\build.ps1`
+Then rebuild the plugin with `./build.sh` or `.\build.ps1`.
+
+## Troubleshooting
+
+**The Ranking column is not visible**
+
+Right-click the Zotero item table column headers and enable **Ranking**.
+
+**A venue is not found**
+
+Check whether the item has a publication title, proceedings title, conference name, or ISSN. Local journals, workshops, and venues absent from the bundled ranking datasets may not match automatically.
+
+**Menus do not show debug actions**
+
+Enable debug mode in the Rankings preferences. The debug menu item is intentionally hidden when debug mode is off.
 
 ## Support
 
-For issues or questions:
-- Check the [README.md](README.md) file
-- Open an issue on [GitHub](https://github.com/ben-AI-cybersec/zotero-publication-rankings/issues)
+For fork-specific issues, open an issue at https://github.com/macvirii/zotero-publication-rankings/issues.
+
+For generally useful upstream changes, consider whether they should also be proposed to the original project.
 
 ---
 
-**Copyright © 2025 Ben Stephens**  
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+Copyright (C) 2025 Ben Stephens. This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.

@@ -30,11 +30,11 @@ Parts of this fork were migrated, refactored, and documented with AI assistance.
 
 - **Custom "Ranking" Column**: See rankings at a glance without modifying your metadata
 - **SJR Journal Rankings**: 30,818+ journals with quartiles (Q1-Q4) and SJR scores
-- **CORE Conference Rankings**: 2,107+ conferences (A*, A, B, C) with historical editions
+- **CORE Conference Rankings**: 2,173+ conferences (A*, A, B, C) with historical editions
 - **ABS Rankings**: 1,822 journals
 - **ABDC Rankings**: 2,651 journals from the Australian Business Deans Council Journal Quality List
 - **Qualis CAPES 2021-2024**: 32,195+ journal titles from the official CAPES spreadsheet, using the best stratum across areas
-- **Nova Classificacao CAPES**: Local rule-based Area 27 classification (MB, B, R, F, I) using ABDC, ABS, JCR when provided, SJR, SPELL, and SciELO sources
+- **Nova Classificacao CAPES**: Local rule-based Area 27 classification (MB, B, R, F, I) using ABDC, ABS, SJR, SPELL, SciELO, and optional local JCR data when provided
 - **SPELL Impact Rankings**: 111 Brazilian journals grouped by impact percentile band
 - **FT50 Rankings**: 50 journals
 - **Color-Coded Display**: Green (Q1/A*) → Blue (Q2/A) → Orange (Q3/B) → Red (Q4/C)
@@ -43,7 +43,7 @@ Parts of this fork were migrated, refactored, and documented with AI assistance.
 - **Badge Display**: 
 <img src="assets/Rankings_Badges.png" style="width: 300px; display: block; margin: 0 auto;">
 
-- **Smart Matching**: 8 fuzzy matching strategies handle title variations and acronyms
+- **Smart Matching**: Exact, ISSN, normalized-title, fuzzy, word-overlap, substring, and acronym strategies handle title variations across databases
 - **Automatic Updates**: Rankings appear when items are added or viewed
 - **Sortable Column**: Click column header to sort by ranking tier (A* → Q4)
 - **Context Menu Integration**: Right-click items for quick ranking operations
@@ -117,7 +117,7 @@ Click the "Ranking" column header to sort items by ranking tier:
 - **Ascending**: Best (A*) → Worst (Unranked)
 - **Descending**: Worst (Unranked) → Best (A*)
 
-The sort order follows: A* > Q1/A > Q2/B > Q3/C > Q4 > National > Unranked
+The sort order groups stronger rankings first across enabled sources, including A*/A/B/C, Q1-Q4, CAPES A1-C, Nova CAPES MB-I, SPELL percentile bands, FT50, national CORE labels, and unranked items.
 
 ## Preferences
 
@@ -136,6 +136,12 @@ Access via Edit → Preferences (Zotero → Settings on Mac), then select "Ranki
 ### Auto-Update Settings
 - **Enable auto-update**: Automatically refresh rankings when viewing items
 
+### User Interface
+- **Use Badges**: Show colored badges instead of colored text
+
+### Extra Field Integration
+- Use the Tools or context menu action to write current rankings into selected items' Extra fields
+
 ### Developer Options
 - **Debug logging**: Enable detailed matching diagnostics in Debug Output
 
@@ -143,7 +149,7 @@ Access via Edit → Preferences (Zotero → Settings on Mac), then select "Ranki
 
 ### Prerequisites
 - Python 3.x for data extraction scripts
-- PowerShell for building the plugin
+- PowerShell for Windows builds or Bash plus `zip`, `7z`, `jar`, or Python's `zipfile` module for Linux/macOS builds
 
 ### Updating Rankings Data
 
@@ -178,7 +184,7 @@ python extract_ft_50.py source-data/FT50_FullList.csv
 python generate_data_js.py
 ```
 
-This generates the `data.js` file in the plugin directory.
+This generates `src/data/data.js` from the JSON files in `update-scripts/`.
 
 ### Building the Plugin
 
@@ -187,69 +193,54 @@ cd zotero-publication-rankings
 .\build.ps1
 ```
 
+```bash
+cd zotero-publication-rankings
+./build.sh
+```
+
 This creates the `.xpi` file ready for installation (e.g., `dist/publication-rankings-0.3.3.xpi`).
 
 ## Project Structure
 
 ```
 zotero-publication-rankings/
-├── assets/							# Assets for the pages
-├── src/                              # Source modules (organized by function)
-│   ├── core/                         # Core plugin functionality
-│   │   ├── rankings.js              # Main coordinator (226 lines)
-│   │   ├── hooks.js                 # Lifecycle event handlers (111 lines)
-│   │   └── prefs-utils.js           # Preference wrapper utilities
-│   ├── data/
-│   │   └── data.js                  # Rankings databases
-│   ├── databases/                    # Database registry & plugins
-│   │   ├── database-registry.js		# Central registry system
-│   │   ├── database-sjr.js			# SJR matching logic (145 lines)
-│   │   ├── database-core.js			# CORE matching logic (47 lines)
-│   │   ├── database-abs.js			# ABS matching logic
-│   │   ├── database-abdc.js			# ABDC matching logic
-│   │   ├── database-qualis-capes.js # Qualis CAPES matching logic
-│   │   ├── database-capes-nova.js	# Nova CAPES calculated ranking logic
-│   │   ├── database-spell.js		# SPELL matching logic
-│   │   └── database-ft-50.js			# FT50 matching logic	
-│   ├── engine/                       # Ranking engine
-│   │   ├── ranking-engine.js        # Core ranking coordinator (132 lines)
-│   │   └── matching.js              # String normalization & algorithms
-│   ├── ui/                           # User interface components
-│   │   ├── column-manager.js        # Column registration & caching (373 lines)
-│   │   ├── menu-manager.js          # Menu creation & handling (260 lines)
-│   │   ├── window-manager.js        # Window lifecycle tracking (108 lines)
-│   │   └── ui-utils.js              # UI formatting, colors, sorting
-│   └── actions/                      # User-triggered operations
-│       ├── ranking-actions.js       # Extra field, debug, manual ranking (613 lines)
-│       └── overrides.js             # Manual override persistence
-├── update-scripts/                   # Data extraction scripts
-│   ├── source-data/                 # CSV/XLSX source datasets
-│   │   ├── scimagojr 2024.csv       # SJR source data
-│   │   ├── full_CORE.csv            # CORE source data
-│   │   ├── ABSRanking2024_Fulllist.csv
-│   │   ├── ABDC-JQL-2025-v1-260326.xlsx
-│   │   ├── FT50_FullList.csv
-│   │   └── classificações_publicadas_todas_as_areas_avaliacao1768259646562.xlsx
-│   ├── extract_sjr.py				# Extract SJR rankings
-│   ├── extract_full_core.py			# Extract CORE rankings
-│   ├── extract_abs.py				# Extract ABS rankings
-│   ├── extract_abdc.py				# Extract ABDC rankings
-│   ├── extract_qualis_capes.py		# Extract Qualis CAPES rankings
-│   ├── extract_spell.py				# Extract SPELL rankings
-│   ├── extract_scielo.py			# Extract SciELO current journals
-│   ├── extract_ft-50.py				# Extract FT50 rankings
-│   └── generate_data_js.py          # Combine into data.js
-├── manifest.json                     # Plugin metadata
-├── bootstrap.js                      # Plugin lifecycle hooks & module loader (150 lines)
-├── prefs.js                          # Default preferences
-├── preferences.xhtml                 # Settings UI
-├── logo.svg                          # Plugin icon
-├── build.ps1                         # Build script (creates XPI)
-├── ARCHITECTURE.md                   # Technical architecture documentation
-├── README.md                         # This file
-├── CHANGELOG.md                      # Version history
-├── INSTALL.md                        # Installation guide
-└── LICENSE                           # GPLv3 license
+├── assets/                         # Screenshots used by README
+├── dist/                           # Local build output; ignored by git
+├── src/
+│   ├── actions/                    # User-triggered operations and overrides
+│   ├── core/                       # Plugin coordinator, hooks, preferences
+│   ├── data/                       # Generated runtime ranking data
+│   │   └── data.js
+│   ├── databases/                  # Database adapters registered with DatabaseRegistry
+│   │   ├── database-abs.js
+│   │   ├── database-abdc.js
+│   │   ├── database-capes-nova.js
+│   │   ├── database-core.js
+│   │   ├── database-ft-50.js
+│   │   ├── database-qualis-capes.js
+│   │   ├── database-registry.js
+│   │   ├── database-sjr.js
+│   │   └── database-spell.js
+│   ├── engine/                     # Ranking orchestration and matching utilities
+│   └── ui/                         # Column, menu, window, badge, color, and sort UI code
+├── update-scripts/
+│   ├── source-data/                # CSV/XLSX input datasets
+│   ├── *_rankings.json             # Generated intermediate ranking datasets
+│   ├── extract_*.py                # Source-data extractors
+│   ├── generate_data_js.py         # Combines intermediate JSON into src/data/data.js
+│   └── xlsx_utils.py               # Minimal XLSX reader used by extractors
+├── bootstrap.js                    # Zotero bootstrap lifecycle and module loading
+├── build.ps1                       # Windows build script; writes dist/*.xpi
+├── build.sh                        # Bash build script; writes dist/*.xpi
+├── CHANGELOG.md
+├── INSTALL.md
+├── LICENSE
+├── logo.svg
+├── manifest.json
+├── preferences.xhtml
+├── prefs.js
+├── README.md
+└── updates.json                    # Zotero update manifest
 ```
 
 **Note**: The build process copies files from `src/` directories and flattens them to the XPI root.
@@ -260,7 +251,7 @@ The plugin uses an extensible modular architecture designed for maintainability 
 
 #### Core System
 - **`bootstrap.js`** - Plugin lifecycle management, loads modules in dependency order
-- **`rankings.js`** (226 lines) - Main coordinator, delegates to specialized modules
+- **`rankings.js`** - Main coordinator, delegates to specialized modules
 - **`hooks.js`** - Zotero lifecycle event handlers (notifier, item observers)
 - **`prefs-utils.js`** - Preference storage wrapper with observer pattern
 
@@ -273,63 +264,62 @@ The plugin uses an extensible modular architecture designed for maintainability 
   - `qualisCapes2021Rankings`: official Qualis CAPES 2021-2024 strata
   - `spellRankings`: SPELL impact percentile bands
   - `scieloRankings`: current SciELO Brasil journal list
-  - `jcrRankings`: optional local JCR quartile dataset, if provided
+  - `jcrRankings`: optional local input for Nova CAPES calculation; empty when no local dataset is provided
   - `ft50Rankings`: 50 journals
 
 #### Database Registry System
-- **`database-registry.js`** (126 lines) - Central registry for all ranking databases
+- **`database-registry.js`** - Central registry for all ranking databases
   - Uniform plugin API: `register({ id, name, prefKey, priority, matcher })`
   - Priority-based ordering across all enabled ranking sources
   - Generic enable/disable support for all databases
-- **`database-sjr.js`** (145 lines) - SJR matching strategies
-  - 3-tier matching: exact → fuzzy (85%+ similarity) → word overlap (66%+)
-  - Handles journal title variations and abbreviations
-- **`database-core.js`** (47 lines) - CORE conference matching
+- **`database-sjr.js`** - SJR matching strategies
+  - ISSN, exact, fuzzy, and word-overlap matching for journal titles
+- **`database-core.js`** - CORE conference matching
   - 5-strategy matching: exact → substring → word overlap → acronym → year-flexible
   - Delegates to `MatchingUtils` for algorithm implementation
 
 #### Ranking Engine
-- **`ranking-engine.js`** (132 lines, simplified from 252) - Core ranking retrieval
+- **`ranking-engine.js`** - Core ranking retrieval
   - Loops through enabled databases via `DatabaseRegistry.getEnabledDatabases()`
   - No hardcoded database logic - fully extensible
   - Extracts publication titles from Zotero items
-- **`matching.js`** (237 lines) - String normalization and matching algorithms
+- **`matching.js`** - String normalization and matching algorithms
   - Exported as `MatchingUtils` global object
   - Shared utilities for all database plugins
 
 #### User Interface
-- **`column-manager.js`** (222 lines) - Custom column registration and display
+- **`column-manager.js`** - Custom column registration and display
   - Column data provider with caching
   - Cell rendering with color coding
-- **`menu-manager.js`** (260 lines) - Context menu and Tools menu integration
+- **`menu-manager.js`** - Context menu and Tools menu integration
   - Item-level and collection-level operations
   - Dynamic menu item creation per window
-- **`window-manager.js`** (108 lines) - Window lifecycle tracking
+- **`window-manager.js`** - Window lifecycle tracking
   - Manages multiple Zotero windows
   - Cleanup on window close
-- **`ui-utils.js`** (133 lines) - UI formatting helpers
+- **`ui-utils.js`** - UI formatting helpers
   - Color coding: Green (A*/Q1) → Blue (A/Q2) → Orange (B/Q3) → Red (C/Q4)
   - Sort value calculation for proper tier ordering
 
 #### User Actions
-- **`ranking-actions.js`** (613 lines) - User-triggered operations
+- **`ranking-actions.js`** - User-triggered operations
   - Batch ranking updates for selected items with progress tracking
   - Extra field integration: `writeRankingsToExtra()` and `updateRankingsInExtra()`
   - Automatic cleanup: `cleanupAllRankingsFromExtra()` on plugin disable
   - Debug matching with detailed logging
   - Manual ranking override dialog
-- **`overrides.js`** (100 lines) - Manual override persistence
+- **`overrides.js`** - Manual override persistence
   - Stored in Zotero preferences
   - Exported as `ManualOverrides` global object
 
 #### Extensibility
 Adding new ranking databases requires minimal core logic changes:
-1. Create `src/databases/database-xxx.js` with a `match(item, data)` function
+1. Create `src/databases/database-xxx.js` with a matcher that accepts the normalized title, debug logger, and Zotero item when needed
 2. Register with `DatabaseRegistry.register({ id, matcher, ... })`
 3. Add preference in `preferences.xhtml`
 4. The generic `handleDatabaseChange()` automatically supports the new database
 
-For detailed architecture documentation, see [ARCHITECTURE.md](ARCHITECTURE.md).
+The build scripts copy these source modules into the XPI root in the order required by `bootstrap.js`.
 
 ## Data Sources
 
@@ -341,7 +331,7 @@ For detailed architecture documentation, see [ARCHITECTURE.md](ARCHITECTURE.md).
 - **Nova Classificacao CAPES 2025-2028**: Local implementation of the Area 27 methodology described by [periodicos-adm.com](https://periodicos-adm.com/sobre)
 - **SPELL 2024**: [SPELL Impacto de Periodicos](https://www.spell.org.br/impacto)
 - **SciELO Brasil**: [Current SciELO Brasil journals](https://www.scielo.br/journals/alpha?status=current)
-- **JCR**: Supported by the Nova CAPES calculation when a local `jcr_rankings.json` dataset is provided; no Clarivate dataset is bundled
+- **JCR**: Not bundled or displayed as a standalone source; `generate_data_js.py` can include a local `jcr_rankings.json` as an optional Nova CAPES input
 - **FT50**: [FT50 Ranking](https://www.ft.com/content/3405a512-5cbb-11e1-8f1f-00144feabdc0)
 
 ## License

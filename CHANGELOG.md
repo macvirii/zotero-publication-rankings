@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- Documentation now reflects the current Zotero 9 fork, release locations, source-data layout, and build output paths.
 
 ## [0.3.3] - 2026-05-09
 - Improved ranking lookup and badge rendering performance while preserving matching rules.
@@ -77,7 +78,7 @@ Fresh start with renamed plugin architecture to support future expansion beyond 
 - **SJR Journal Rankings** - Support for 30,818+ journals from SCImago Journal Rankings 2024
   - Displays quartile classifications (Q1-Q4) with SJR scores
   - Format: "Q1 18.288", "Q2 1.423", "Q3 0.628", "Q4 0.145"
-- **CORE Conference Rankings** - Support for 2,107+ conferences from CORE 2023
+- **CORE Conference Rankings** - Support for 2,173+ conferences from CORE 2023
   - Australian Computing Research rankings (A*, A, B, C)
   - Historical rankings with vintage years (e.g., "B [2018]")
   - Australasian and National classifications (Au A, Nat US, etc.)
@@ -125,7 +126,7 @@ Fresh start with renamed plugin architecture to support future expansion beyond 
   - `src/engine/` - Ranking engine and matching algorithms
   - `src/ui/` - UI components (column, menus, windows)
   - `src/actions/` - User actions and manual overrides
-- **Zotero 7 API Compliance**
+- **Zotero bootstrap API compliance**
   - Modern Services API (no deprecated XPCOM)
   - Bootstrap.js lifecycle hooks pattern
   - ItemTreeManager for custom columns
