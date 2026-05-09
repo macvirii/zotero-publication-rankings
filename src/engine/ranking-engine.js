@@ -93,6 +93,9 @@ var RankingEngine = {
 						case 'abs':
 							rank = 'ABS: ' + rank;
 							break;
+						case 'abdc':
+							rank = 'ABDC: ' + rank;
+							break;
 						case 'ft50':
 							rank = 'FT50';
 							break;
@@ -101,6 +104,9 @@ var RankingEngine = {
 							break;
 						case 'capesNova':
 							rank = 'Nova CAPES: ' + rank;
+							break;
+						case 'spell':
+							rank = 'SPELL: ' + rank;
 							break;
 					}
 

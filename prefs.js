@@ -17,6 +17,9 @@ pref("extensions.publication-rankings.enableCORE", true);
 // Enable ABS journal rankings
 pref("extensions.publication-rankings.enableABS", true);
 
+// Enable ABDC journal rankings
+pref("extensions.publication-rankings.enableABDC", true);
+
 // Enable FT50 journal rankings
 pref("extensions.publication-rankings.enableFT50", true);
 
@@ -25,6 +28,9 @@ pref("extensions.publication-rankings.enableQualisCapes", true);
 
 // Enable Nova Classificacao CAPES journal rankings
 pref("extensions.publication-rankings.enableCapesNova", true);
+
+// Enable SPELL impact rankings
+pref("extensions.publication-rankings.enableSPELL", true);
 
 // Disable Badges
 pref("extensions.publication-rankings.enableBadges", false);

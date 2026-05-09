@@ -46,9 +46,11 @@ sourceFiles=(
     "src/databases/database-sjr.js"
     "src/databases/database-core.js"
     "src/databases/database-abs.js"
+    "src/databases/database-abdc.js"
     "src/databases/database-ft-50.js"
     "src/databases/database-qualis-capes.js"
     "src/databases/database-capes-nova.js"
+    "src/databases/database-spell.js"
     # Engine
     "src/engine/ranking-engine.js"
     "src/engine/matching.js"

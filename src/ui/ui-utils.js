@@ -82,6 +82,12 @@ var UIUtils = {
 				break;
 			case "ft50":
 				return '#2E7D32'; // Dark Green
+			case "abdc":
+				if (ranking === 'A*') return '#2E7D32';
+				if (ranking === 'A') return '#0288D1';
+				if (ranking === 'B') return '#F57C00';
+				if (ranking === 'C') return '#D32F2F';
+				break;
 			case "qualisCapes":
 				if (ranking.startsWith('A1')) return '#2E7D32';
 				if (ranking.startsWith('A2')) return '#388E3C';
@@ -97,6 +103,12 @@ var UIUtils = {
 				if (ranking === 'R') return '#F57C00';
 				if (ranking === 'F') return '#D32F2F';
 				if (ranking === 'I') return '#757575';
+				break;
+			case "spell":
+				if (ranking === 'Top 10%') return '#2E7D32';
+				if (ranking === '10-40%') return '#0288D1';
+				if (ranking === '40-70%') return '#F57C00';
+				if (ranking === '70-100%') return '#D32F2F';
 				break;
 
 			default:
@@ -169,12 +181,24 @@ var UIUtils = {
 				if (ranking.startsWith('B4')) return 740;
 				if (ranking.startsWith('C')) return 100;
 				break;
+			case "abdc":
+				if (ranking === 'A*') return 1000;
+				if (ranking === 'A') return 850;
+				if (ranking === 'B') return 650;
+				if (ranking === 'C') return 450;
+				break;
 			case "capesNova":
 				if (ranking === 'MB') return 980;
 				if (ranking === 'B') return 800;
 				if (ranking === 'R') return 500;
 				if (ranking === 'F') return 300;
 				if (ranking === 'I') return 50;
+				break;
+			case "spell":
+				if (ranking === 'Top 10%') return 800;
+				if (ranking === '10-40%') return 500;
+				if (ranking === '40-70%') return 300;
+				if (ranking === '70-100%') return 100;
 				break;
 			default:
 				// Other/Unknown rankings
@@ -249,6 +273,12 @@ var UIUtils = {
 			case "ft50":
 				// FT50
 				return 'Financial Times 50 journal ranking';
+			case "abdc":
+				if (ranking === 'A*') return 'ABDC A* - Highest quality journal';
+				if (ranking === 'A') return 'ABDC A - High quality journal';
+				if (ranking === 'B') return 'ABDC B - Well regarded journal';
+				if (ranking === 'C') return 'ABDC C - Recognised journal';
+				break;
 			case "qualisCapes":
 				return 'Qualis CAPES 2021-2024 ' + ranking;
 			case "capesNova":
@@ -257,6 +287,12 @@ var UIUtils = {
 				if (ranking === 'R') return 'Nova CAPES R - Regular (2 points)';
 				if (ranking === 'F') return 'Nova CAPES F - Fraco (1 point)';
 				if (ranking === 'I') return 'Nova CAPES I - Insuficiente (0 points)';
+			case "spell":
+				if (ranking === 'Top 10%') return 'SPELL - Top 10% by impact';
+				if (ranking === '10-40%') return 'SPELL - Between top 10% and 40% by impact';
+				if (ranking === '40-70%') return 'SPELL - Between top 40% and 70% by impact';
+				if (ranking === '70-100%') return 'SPELL - Between top 70% and 100% by impact';
+				break;
 		}
 		return ranking;
 	},
@@ -266,9 +302,11 @@ var UIUtils = {
 			case "sjr": return "SJR";
 			case "core": return "CORE";
 			case "abs": return "ABS";
+			case "abdc": return "ABDC";
 			case "ft50": return "FT50";
 			case "qualisCapes": return "Qualis CAPES";
 			case "capesNova": return "Nova CAPES";
+			case "spell": return "SPELL";
 			default: return id ? id.toUpperCase() : '';
 		}
 	},
