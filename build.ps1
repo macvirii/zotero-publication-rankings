@@ -8,16 +8,21 @@
 
 $pluginName = "publication-rankings"
 $version = "0.3.3"
-$outputFile = "$pluginName-$version.xpi"
+
+# Get the plugin directory
+$pluginDir = $PSScriptRoot
+$distDir = Join-Path $pluginDir "dist"
+$outputFile = Join-Path $distDir "$pluginName-$version.xpi"
+
+if (!(Test-Path $distDir)) {
+    New-Item -ItemType Directory -Path $distDir | Out-Null
+}
 
 # Remove old XPI if it exists
 if (Test-Path $outputFile) {
     Remove-Item $outputFile
     Write-Host "Removed old $outputFile"
 }
-
-# Get the plugin directory
-$pluginDir = $PSScriptRoot
 
 # Create a temporary directory for building
 $tempDir = Join-Path $env:TEMP "zotero-plugin-build"
@@ -49,7 +54,11 @@ $sourceFiles = @(
     "src\databases\database-sjr.js",
     "src\databases\database-core.js",
     "src\databases\database-abs.js",
+    "src\databases\database-abdc.js",
     "src\databases\database-ft-50.js",
+    "src\databases\database-qualis-capes.js",
+    "src\databases\database-capes-nova.js",
+    "src\databases\database-spell.js",
     # Engine
     "src\engine\ranking-engine.js",
     "src\engine\matching.js",

@@ -2,7 +2,7 @@ import csv
 import json
 import os
 
-def extract_full_core_rankings(csv_file='full_CORE.csv'):
+def extract_full_core_rankings(csv_file='source-data/full_CORE.csv'):
     """
     Extract comprehensive CORE conference rankings from full CSV file.
     Includes: Main CORE ranks (A*, A, B, C), Australasian, and National rankings.
@@ -77,7 +77,7 @@ def extract_full_core_rankings(csv_file='full_CORE.csv'):
 if __name__ == '__main__':
     rankings = extract_full_core_rankings()
 
-    if os.path.exists('full_CORE.csv'):
+    if os.path.exists('source-data/full_CORE.csv'):
         print('Import file exists')
     else:
         print('!!! Import file does not exist')

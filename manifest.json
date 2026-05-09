@@ -3,7 +3,7 @@
 	"name": "Publication Rankings",
 	"version": "0.3.3",
 	"description": "Displays journal and conference rankings (SJR, CORE, and more) in a custom Ranking column",
-	"homepage_url": "https://github.com/ben-AI-cybersec/zotero-publication-rankings",
+	"homepage_url": "https://github.com/macvirii/zotero-publication-rankings",
 	"author": "Ben Stephens",
 	"icons": {
 		"48": "logo.svg",
@@ -12,7 +12,7 @@
 	"applications": {
 		"zotero": {
 			"id": "publication-rankings@zotero.org",
-			"update_url": "https://raw.githubusercontent.com/ben-AI-cybersec/zotero-publication-rankings/main/updates.json",
+			"update_url": "https://raw.githubusercontent.com/macvirii/zotero-publication-rankings/main/updates.json",
 			"strict_min_version": "7.0",
 			"strict_max_version": "9.*"
 		}

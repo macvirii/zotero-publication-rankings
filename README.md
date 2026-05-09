@@ -156,21 +156,21 @@ python extract_sjr.py
 # Step 2: Extract CORE rankings (from full_CORE.csv with historical data)
 python extract_full_core.py
 
-# Step 3: Extract ABS rankings (from ABSRanking2024_FullList.csv)
-python extract_abs.py
+# Step 3: Extract ABS rankings (from source-data/ABSRanking2024_Fulllist.csv)
+python extract_abs.py source-data/ABSRanking2024_Fulllist.csv
 
-# Step 4: Extract ABDC rankings (from ABDC-JQL-2025-v1-260326.xlsx)
-python extract_abdc.py ABDC-JQL-2025-v1-260326.xlsx
+# Step 4: Extract ABDC rankings (from source-data/ABDC-JQL-2025-v1-260326.xlsx)
+python extract_abdc.py source-data/ABDC-JQL-2025-v1-260326.xlsx
 
-# Step 5: Extract Qualis CAPES rankings (from CAPES XLSX)
-python extract_qualis_capes.py ../classificações_publicadas_todas_as_areas_avaliacao1768259646562.xlsx
+# Step 5: Extract Qualis CAPES rankings (from source-data/CAPES XLSX)
+python extract_qualis_capes.py source-data/classificações_publicadas_todas_as_areas_avaliacao1768259646562.xlsx
 
 # Step 6: Extract SPELL and SciELO supporting datasets
 python extract_spell.py
 python extract_scielo.py
 
-# Step 7: Extract FT50 rankings (from FT50_FullList.csv)
-python extract_ft-50.py
+# Step 7: Extract FT50 rankings (from source-data/FT50_FullList.csv)
+python extract_ft_50.py source-data/FT50_FullList.csv
 
 # Step 8: Combine into plugin data file
 python generate_data_js.py
@@ -185,7 +185,7 @@ cd zotero-publication-rankings
 .\build.ps1
 ```
 
-This creates the `.xpi` file ready for installation (e.g., `publication-rankings-0.3.3.xpi`).
+This creates the `.xpi` file ready for installation (e.g., `dist/publication-rankings-0.3.3.xpi`).
 
 ## Project Structure
 
@@ -221,8 +221,13 @@ zotero-publication-rankings/
 │       ├── ranking-actions.js       # Extra field, debug, manual ranking (613 lines)
 │       └── overrides.js             # Manual override persistence
 ├── update-scripts/                   # Data extraction scripts
-│   ├── scimagojr 2024.csv           # SJR source data
-│   ├── full_CORE.csv                # CORE source data
+│   ├── source-data/                 # CSV/XLSX source datasets
+│   │   ├── scimagojr 2024.csv       # SJR source data
+│   │   ├── full_CORE.csv            # CORE source data
+│   │   ├── ABSRanking2024_Fulllist.csv
+│   │   ├── ABDC-JQL-2025-v1-260326.xlsx
+│   │   ├── FT50_FullList.csv
+│   │   └── classificações_publicadas_todas_as_areas_avaliacao1768259646562.xlsx
 │   ├── extract_sjr.py				# Extract SJR rankings
 │   ├── extract_full_core.py			# Extract CORE rankings
 │   ├── extract_abs.py				# Extract ABS rankings

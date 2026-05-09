@@ -9,16 +9,19 @@
 
 pluginName="publication-rankings"
 version="0.3.3"
-outputFile="${pluginName}-${version}.xpi"
-
-# Remove old XPI if it exists
-if [ -f "$outputFile" ]; then
-    rm "$outputFile"
-    echo "Removed old $outputFile"
-fi
+distDir="dist"
+outputFile="${distDir}/${pluginName}-${version}.xpi"
 
 # Get the plugin directory
 pluginDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Remove old XPI if it exists
+if [ -f "$pluginDir/$outputFile" ]; then
+    rm "$pluginDir/$outputFile"
+    echo "Removed old $outputFile"
+fi
+
+mkdir -p "$pluginDir/$distDir"
 
 # Create a temporary directory for building
 tempDir=$(mktemp -d)
