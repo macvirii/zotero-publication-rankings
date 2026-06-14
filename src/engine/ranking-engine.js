@@ -87,6 +87,9 @@ var RankingEngine = {
 						case 'sjr':
 							rank = 'SJR: ' + rank;
 							break;
+						case 'jcr':
+							rank = 'JCR: ' + rank;
+							break;
 						case 'core':
 							rank = 'CORE: ' + rank;
 							break;

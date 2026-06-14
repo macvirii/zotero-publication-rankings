@@ -14,6 +14,9 @@ pref("extensions.publication-rankings.autoUpdate", true);
 // Enable CORE conference rankings database
 pref("extensions.publication-rankings.enableCORE", true);
 
+// Enable local JCR journal rankings when a dataset is provided
+pref("extensions.publication-rankings.enableJCR", true);
+
 // Enable ABS journal rankings
 pref("extensions.publication-rankings.enableABS", true);
 

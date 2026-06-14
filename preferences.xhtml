@@ -28,6 +28,21 @@
             <label value="Last Update:" />
             <label value="2024" />
         </html:div>
+        <!-- JCR -->
+        <checkbox id="publication-rankings-enableJCR"
+                  label="Journal Citation Reports (JCR)"
+                  preference="extensions.publication-rankings.enableJCR" />
+        <description style="margin-left: 25px; margin-bottom: 10px;">
+            Local JCR quartile rankings from an authorized CSV/XLSX export.
+        </description>
+        <html:div style="margin-left: 25px; margin-bottom: 10px;">
+            <label value="Source:" />
+            <label is="zotero-text-link" value="Journal Citation Reports" href="https://jcr.clarivate.com/" />
+        </html:div>
+        <html:div style="margin-left: 25px; margin-bottom: 20px;">
+            <label value="Last Update:" />
+            <label value="Local dataset" />
+        </html:div>
         <!-- CORE -->
         <checkbox id="publication-rankings-enableCORE"
                   label="CORE Conference Rankings"
@@ -136,7 +151,7 @@
     </vbox>
 
     <description style="margin-top: 10px; font-style: italic;">
-        Note: JCR is considered by the Nova CAPES rule when a local jcr_rankings.json dataset is provided; no Clarivate dataset is bundled.
+        Note: local JCR exports and generated JCR datasets may be subject to institutional or Clarivate licensing terms.
     </description>
 </groupbox>
 

@@ -43,6 +43,7 @@ var UIUtils = {
 
 			switch (id) {
 			case "sjr":
+			case "jcr":
 				// SJR Quartiles (Green to Red gradient)
 				if (ranking.startsWith('Q1')) {
 					return '#2E7D32'; // Dark green (best)
@@ -154,6 +155,7 @@ var UIUtils = {
 
 			switch (id) {
 			case "sjr":
+			case "jcr":
 			case "core":
 				// CORE A* = highest
 				if (ranking === 'A*' || ranking.startsWith('A* ')) return 1000;
@@ -283,10 +285,16 @@ var UIUtils = {
 				break;
 			case "sjr":
 				// SJR quartiles
-				if (ranking === 'Q1') return 'SJR Q1 - Top 25% of journals';
-				if (ranking === 'Q2') return 'SJR Q2 - Top 50% of journals';
-				if (ranking === 'Q3') return 'SJR Q3 - Top 75% of journals';
-				if (ranking === 'Q4') return 'SJR Q4 - Bottom 25% of journals';
+				if (ranking.startsWith('Q1')) return 'SJR Q1 - Top 25% of journals';
+				if (ranking.startsWith('Q2')) return 'SJR Q2 - Top 50% of journals';
+				if (ranking.startsWith('Q3')) return 'SJR Q3 - Top 75% of journals';
+				if (ranking.startsWith('Q4')) return 'SJR Q4 - Bottom 25% of journals';
+				break;
+			case "jcr":
+				if (ranking.startsWith('Q1')) return 'JCR Q1 - Top 25% of journals';
+				if (ranking.startsWith('Q2')) return 'JCR Q2 - Top 50% of journals';
+				if (ranking.startsWith('Q3')) return 'JCR Q3 - Top 75% of journals';
+				if (ranking.startsWith('Q4')) return 'JCR Q4 - Bottom 25% of journals';
 				break;
 			case "abs":
 				// ABS Quantriles
@@ -326,6 +334,7 @@ var UIUtils = {
 	getDatabaseLabel: function(id) {
 		switch (id) {
 			case "sjr": return "SJR";
+			case "jcr": return "JCR";
 			case "core": return "CORE";
 			case "abs": return "ABS";
 			case "abdc": return "ABDC";

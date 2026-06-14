@@ -30,11 +30,12 @@ Parts of this fork were migrated, refactored, and documented with AI assistance.
 
 - **Custom "Ranking" Column**: See rankings at a glance without modifying your metadata
 - **SJR Journal Rankings**: 30,818+ journals with quartiles (Q1-Q4) and SJR scores
+- **JCR Rankings**: Optional local Journal Citation Reports quartiles and Journal Impact Factor values from an authorized export
 - **CORE Conference Rankings**: 2,173+ conferences (A*, A, B, C) with historical editions
 - **ABS Rankings**: 1,822 journals
 - **ABDC Rankings**: 2,651 journals from the Australian Business Deans Council Journal Quality List
 - **Qualis CAPES 2021-2024**: 32,195+ journal titles from the official CAPES spreadsheet, using the best stratum across areas
-- **Nova Classificacao CAPES**: Local rule-based Area 27 classification (MB, B, R, F, I) using ABDC, ABS, SJR, SPELL, SciELO, and optional local JCR data when provided
+- **Nova Classificacao CAPES**: Local rule-based Area 27 classification (MB, B, R, F, I) using ABDC, ABS, JCR, SJR, SPELL, and SciELO data when provided
 - **SPELL Impact Rankings**: 111 Brazilian journals grouped by impact percentile band
 - **FT50 Rankings**: 50 journals
 - **Color-Coded Display**: Green (Q1/A*) → Blue (Q2/A) → Orange (Q3/B) → Red (Q4/C)
@@ -125,6 +126,7 @@ Access via Edit → Preferences (Zotero → Settings on Mac), then select "Ranki
 
 ### Ranking Databases
 - **SJR (SCImago Journal Rankings)**: Always enabled - 30,818+ journals
+- **JCR (Journal Citation Reports)**: Toggleable - local dataset only, when supplied
 - **CORE (Computing Research & Education)**: Toggleable - 2,173+ conferences
 - **ABS Rankings***: Toggleable - 1,822 journals
 - **ABDC Rankings***: Toggleable - 2,651 journals
@@ -164,23 +166,26 @@ python extract_sjr.py
 # Step 2: Extract CORE rankings (from full_CORE.csv with historical data)
 python extract_full_core.py
 
-# Step 3: Extract ABS rankings (from source-data/ABSRanking2024_Fulllist.csv)
+# Step 3: Extract JCR rankings when you have an authorized local export (optional)
+python extract_jcr.py source-data/jcr_export.csv
+
+# Step 4: Extract ABS rankings (from source-data/ABSRanking2024_Fulllist.csv)
 python extract_abs.py source-data/ABSRanking2024_Fulllist.csv
 
-# Step 4: Extract ABDC rankings (from source-data/ABDC-JQL-2025-v1-260326.xlsx)
+# Step 5: Extract ABDC rankings (from source-data/ABDC-JQL-2025-v1-260326.xlsx)
 python extract_abdc.py source-data/ABDC-JQL-2025-v1-260326.xlsx
 
-# Step 5: Extract Qualis CAPES rankings (from source-data/CAPES XLSX)
+# Step 6: Extract Qualis CAPES rankings (from source-data/CAPES XLSX)
 python extract_qualis_capes.py source-data/classificações_publicadas_todas_as_areas_avaliacao1768259646562.xlsx
 
-# Step 6: Extract SPELL and SciELO supporting datasets
+# Step 7: Extract SPELL and SciELO supporting datasets
 python extract_spell.py
 python extract_scielo.py
 
-# Step 7: Extract FT50 rankings (from source-data/FT50_FullList.csv)
+# Step 8: Extract FT50 rankings (from source-data/FT50_FullList.csv)
 python extract_ft_50.py source-data/FT50_FullList.csv
 
-# Step 8: Combine into plugin data file
+# Step 9: Combine into plugin data file
 python generate_data_js.py
 ```
 
@@ -198,7 +203,7 @@ cd zotero-publication-rankings
 ./build.sh
 ```
 
-This creates the `.xpi` file ready for installation (e.g., `dist/publication-rankings-0.3.3.xpi`).
+This creates the `.xpi` file ready for installation (e.g., `dist/publication-rankings-0.3.4.xpi`).
 
 ## Project Structure
 
@@ -217,6 +222,7 @@ zotero-publication-rankings/
 │   │   ├── database-capes-nova.js
 │   │   ├── database-core.js
 │   │   ├── database-ft-50.js
+│   │   ├── database-jcr.js
 │   │   ├── database-qualis-capes.js
 │   │   ├── database-registry.js
 │   │   ├── database-sjr.js
@@ -258,13 +264,13 @@ The plugin uses an extensible modular architecture designed for maintainability 
 #### Data Layer
 - **`data.js`** - Ranking databases
   - `sjrRankings`: 30,818 journals with quartiles (Q1-Q4) and SJR scores
+  - `jcrRankings`: optional local JCR journal quartiles and Journal Impact Factor values
   - `coreRankings`: 2,173 conferences with tiers (A*, A, B, C) and historical editions
   - `absRankings`: 1,822 journals with ranking (1, 2, 3, 4, 4*)
   - `abdcRankings`: 2,651 journals with ABDC quality ratings (A*, A, B, C)
   - `qualisCapes2021Rankings`: official Qualis CAPES 2021-2024 strata
   - `spellRankings`: SPELL impact percentile bands
   - `scieloRankings`: current SciELO Brasil journal list
-  - `jcrRankings`: optional local input for Nova CAPES calculation; empty when no local dataset is provided
   - `ft50Rankings`: 50 journals
 
 #### Database Registry System
@@ -274,6 +280,8 @@ The plugin uses an extensible modular architecture designed for maintainability 
   - Generic enable/disable support for all databases
 - **`database-sjr.js`** - SJR matching strategies
   - ISSN, exact, fuzzy, and word-overlap matching for journal titles
+- **`database-jcr.js`** - JCR journal matching
+  - ISSN and normalized-title matching against a locally generated JCR dataset
 - **`database-core.js`** - CORE conference matching
   - 5-strategy matching: exact → substring → word overlap → acronym → year-flexible
   - Delegates to `MatchingUtils` for algorithm implementation
@@ -324,6 +332,7 @@ The build scripts copy these source modules into the XPI root in the order requi
 ## Data Sources
 
 - **SJR 2024**: [SCImago Journal & Country Rank](https://www.scimagojr.com/)
+- **JCR**: [Journal Citation Reports](https://jcr.clarivate.com/) local exports are supported through `extract_jcr.py`; do not publish generated JCR data unless your license permits it
 - **CORE 2023**: [Computing Research and Education](http://portal.core.edu.au/conf-ranks/)
 - **ABS 2024**: [ABS Ranking](https://journalranking.org)
 - **ABDC 2025**: [ABDC Journal Quality List](https://abdc.edu.au/abdc-journal-quality-list/)
@@ -331,7 +340,6 @@ The build scripts copy these source modules into the XPI root in the order requi
 - **Nova Classificacao CAPES 2025-2028**: Local implementation of the Area 27 methodology described by [periodicos-adm.com](https://periodicos-adm.com/sobre)
 - **SPELL 2024**: [SPELL Impacto de Periodicos](https://www.spell.org.br/impacto)
 - **SciELO Brasil**: [Current SciELO Brasil journals](https://www.scielo.br/journals/alpha?status=current)
-- **JCR**: Not bundled or displayed as a standalone source; `generate_data_js.py` can include a local `jcr_rankings.json` as an optional Nova CAPES input
 - **FT50**: [FT50 Ranking](https://www.ft.com/content/3405a512-5cbb-11e1-8f1f-00144feabdc0)
 
 ## License

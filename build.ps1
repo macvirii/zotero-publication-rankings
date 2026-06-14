@@ -7,7 +7,7 @@
 # XPI files are just ZIP files with a different extension
 
 $pluginName = "publication-rankings"
-$version = "0.3.3"
+$version = "0.3.4"
 
 # Get the plugin directory
 $pluginDir = $PSScriptRoot
@@ -52,6 +52,7 @@ $sourceFiles = @(
     # Databases
     "src\databases\database-registry.js",
     "src\databases\database-sjr.js",
+    "src\databases\database-jcr.js",
     "src\databases\database-core.js",
     "src\databases\database-abs.js",
     "src\databases\database-abdc.js",

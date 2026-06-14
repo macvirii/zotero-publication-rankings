@@ -1,3 +1,7 @@
 *.xpi
 *.bak
 assets/Thumbs.db
+__pycache__/
+update-scripts/jcr_rankings.json
+update-scripts/source-data/jcr*
+update-scripts/source-data/JCR*

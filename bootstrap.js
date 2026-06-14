@@ -50,6 +50,7 @@ function loadModules(rootURI) {
 		// Database system
 		'database-registry.js',   // Database plugin system (from src/databases/)
 		'database-sjr.js',        // SJR database plugin (from src/databases/)
+		'database-jcr.js',        // JCR database plugin (from src/databases/)
 		'database-core.js',       // CORE database plugin (from src/databases/)
 		'database-abs.js',		  // ABS database plugin (from src/databases/)	
 		'database-abdc.js',       // ABDC database plugin (from src/databases/)

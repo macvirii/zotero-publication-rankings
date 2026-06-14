@@ -83,6 +83,8 @@ To regenerate all data after updating source files:
 cd update-scripts
 python extract_sjr.py
 python extract_full_core.py
+# Optional, when you have an authorized local JCR export:
+python extract_jcr.py source-data/jcr_export.csv
 python extract_abs.py source-data/ABSRanking2024_Fulllist.csv
 python extract_abdc.py source-data/ABDC-JQL-2025-v1-260326.xlsx
 python extract_qualis_capes.py source-data/classificações_publicadas_todas_as_areas_avaliacao1768259646562.xlsx

@@ -6,7 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.3.4] - 2026-06-14
 - Documentation now reflects the current Zotero 9 fork, release locations, source-data layout, and build output paths.
+- Added optional local JCR ranking support, including CSV/XLSX extraction, database matching, preferences, badges, and build packaging.
 
 ## [0.3.3] - 2026-05-09
 - Improved ranking lookup and badge rendering performance while preserving matching rules.
