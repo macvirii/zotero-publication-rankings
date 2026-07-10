@@ -11,4 +11,9 @@ jobs:
     runs-on: [linux-x64, dotnet, node]
     steps:
       - uses: actions/checkout@v4
-      - run: docker run --rm -v "$PWD:/src" -w /src semgrep/semgrep:1.168.0 semgrep scan --config auto --error .
+      - name: Install Semgrep
+        run: |
+          python3 -m venv "$RUNNER_TEMP/semgrep"
+          "$RUNNER_TEMP/semgrep/bin/pip" install --disable-pip-version-check semgrep==1.168.0
+      - name: Scan
+        run: $RUNNER_TEMP/semgrep/bin/semgrep scan --config auto --error .
