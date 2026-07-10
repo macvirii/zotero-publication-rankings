@@ -6,9 +6,13 @@
  * Licensed under GNU General Public License v3.0 (GPLv3)
  */
 
-/* global coreRankings, sjrRankings */
+/* global Zotero, coreRankings */
 
 var MatchingUtils = {
+	coreIndex: null,
+	coreExactIndex: null,
+	coreAcronymIndex: null,
+
 	/**
 	 * Normalize a string for comparison
 	 * Applies multiple transformations to create a canonical form for matching:
@@ -67,6 +71,42 @@ var MatchingUtils = {
 	},
 
 	/**
+	 * Lazily build normalized indexes for the CORE rankings database
+	 */
+	buildCoreIndex: function() {
+		if (this.coreIndex) {
+			return;
+		}
+
+		this.coreIndex = [];
+		this.coreExactIndex = Object.create(null);
+		this.coreAcronymIndex = Object.create(null);
+
+		for (var title in coreRankings) {
+			var normalized = this.normalizeString(title);
+			var acronym = this.extractAcronym(title);
+			var entry = {
+				title: title,
+				rank: coreRankings[title],
+				normalized: normalized,
+				words: normalized.split(' ').filter(function(w) { return w.length > 3; }),
+				acronym: acronym
+			};
+
+			this.coreIndex.push(entry);
+			if (!this.coreExactIndex[normalized]) {
+				this.coreExactIndex[normalized] = entry;
+			}
+			if (acronym) {
+				if (!this.coreAcronymIndex[acronym]) {
+					this.coreAcronymIndex[acronym] = [];
+				}
+				this.coreAcronymIndex[acronym].push(entry);
+			}
+		}
+	},
+
+	/**
 	 * Match a conference title against CORE rankings database
 	 * Uses 5 matching strategies in priority order:
 	 * 1. Exact normalized match
@@ -76,11 +116,14 @@ var MatchingUtils = {
 	 * 5. Acronym match (4+ chars, unique matches only)
 	 * 
 	 * @param {string} zoteroTitle - The conference title from Zotero item
-	 * @param {boolean} [enableDebug=false] - Enable detailed debug logging
+	 * @param {Function|boolean} [debugParam=false] - Debug function or legacy enable flag
 	 * @returns {string|null} CORE ranking or null if no match found
 	 */
-	matchCoreConference: function(zoteroTitle, enableDebug = false) {
-		var debugLog = enableDebug ? function(msg) { Zotero.debug("[MATCH DEBUG] " + msg); } : function() {};
+	matchCoreConference: function(zoteroTitle, debugParam = false) {
+		var debugLog = typeof debugParam === 'function' ?
+			debugParam :
+			debugParam ? function(msg) { Zotero.debug("[MATCH DEBUG] " + msg); } : function() {};
+		this.buildCoreIndex();
 		
 		var cleanedZotero = this.cleanConferenceTitle(zoteroTitle);
 		var normalizedZotero = this.normalizeString(cleanedZotero);
@@ -93,34 +136,32 @@ var MatchingUtils = {
 		
 		// Strategy 1: Exact match (normalized)
 		debugLog(`  CORE Strategy 1: Trying exact normalized match`);
-		for (var title in coreRankings) {
-			var normalizedCore = this.normalizeString(title);
-			if (normalizedCore === normalizedZotero) {
-				debugLog(`  ✓ CORE exact match: "${title}" (${coreRankings[title]})`);
-				return coreRankings[title];
-			}
+		var exactMatch = this.coreExactIndex[normalizedZotero];
+		if (exactMatch) {
+			debugLog(`  ✓ CORE exact match: "${exactMatch.title}" (${exactMatch.rank})`);
+			return exactMatch.rank;
 		}
 		debugLog(`  No CORE exact match`);
 		
 		// Strategy 2: Check if Zotero title contains CORE title (substring match)
 		debugLog(`  CORE Strategy 2: Trying substring (CORE in Zotero)`);
-		for (var title in coreRankings) {
-			var normalizedCore = this.normalizeString(title);
+		for (var i = 0; i < this.coreIndex.length; i++) {
+			var candidate = this.coreIndex[i];
 			// Only match if CORE title is substantial (>20 chars) to avoid false positives
-			if (normalizedZotero.indexOf(normalizedCore) !== -1 && normalizedCore.length > 20) {
-				debugLog(`  ✓ CORE substring match: "${title}" (${coreRankings[title]})`);
-				return coreRankings[title];
+			if (normalizedZotero.indexOf(candidate.normalized) !== -1 && candidate.normalized.length > 20) {
+				debugLog(`  ✓ CORE substring match: "${candidate.title}" (${candidate.rank})`);
+				return candidate.rank;
 			}
 		}
 		debugLog(`  No CORE substring match`);
 		
 		// Strategy 3: Check if CORE title contains Zotero title (reverse substring)
 		debugLog(`  CORE Strategy 3: Trying reverse substring (Zotero in CORE)`);
-		for (var title in coreRankings) {
-			var normalizedCore = this.normalizeString(title);
-			if (normalizedCore.indexOf(normalizedZotero) !== -1 && normalizedZotero.length > 20) {
-				debugLog(`  ✓ CORE reverse substring match: "${title}" (${coreRankings[title]})`);
-				return coreRankings[title];
+		for (var i = 0; i < this.coreIndex.length; i++) {
+			var candidate = this.coreIndex[i];
+			if (candidate.normalized.indexOf(normalizedZotero) !== -1 && normalizedZotero.length > 20) {
+				debugLog(`  ✓ CORE reverse substring match: "${candidate.title}" (${candidate.rank})`);
+				return candidate.rank;
 			}
 		}
 		debugLog(`  No CORE reverse substring match`);
@@ -128,23 +169,23 @@ var MatchingUtils = {
 		// Strategy 4: Word overlap matching (for titles with extra words like "SIGSAC")
 		debugLog(`  CORE Strategy 4: Trying word overlap`);
 		var zoteroWords = normalizedZotero.split(' ').filter(function(w) { return w.length > 3; });
-		for (var title in coreRankings) {
-			var normalizedCore = this.normalizeString(title);
-			var coreWords = normalizedCore.split(' ').filter(function(w) { return w.length > 3; });
+		for (var entryIndex = 0; entryIndex < this.coreIndex.length; entryIndex++) {
+			var candidate = this.coreIndex[entryIndex];
+			var coreWords = candidate.words;
 			
 			// Count how many significant words overlap
 			var matchCount = 0;
-			for (var i = 0; i < coreWords.length; i++) {
-				if (zoteroWords.indexOf(coreWords[i]) !== -1) {
+			for (var wordIndex = 0; wordIndex < coreWords.length; wordIndex++) {
+				if (zoteroWords.indexOf(coreWords[wordIndex]) !== -1) {
 					matchCount++;
 				}
 			}
 			
 			// If most core words are present (80%+), it's likely a match
 			if (coreWords.length >= 4 && matchCount / coreWords.length >= 0.8) {
-				debugLog(`  ✓ CORE word overlap match: "${title}" (${coreRankings[title]})`);
+				debugLog(`  ✓ CORE word overlap match: "${candidate.title}" (${candidate.rank})`);
 				debugLog(`    Matched ${matchCount}/${coreWords.length} words (${(matchCount/coreWords.length*100).toFixed(0)}%)`);
-				return coreRankings[title];
+				return candidate.rank;
 			}
 		}
 		debugLog(`  No CORE word overlap match`);
@@ -154,17 +195,7 @@ var MatchingUtils = {
 		if (zoteroAcronym && zoteroAcronym.length >= 4) {
 			debugLog(`  CORE Strategy 5: Trying acronym match "${zoteroAcronym}" (>= 4 chars, used as tiebreaker)`);
 			
-			var acronymMatches = [];
-			for (var title in coreRankings) {
-				var coreAcronym = this.extractAcronym(title);
-				if (coreAcronym === zoteroAcronym) {
-					acronymMatches.push({
-						title: title,
-						rank: coreRankings[title],
-						normalized: this.normalizeString(title)
-					});
-				}
-			}
+			var acronymMatches = this.coreAcronymIndex[zoteroAcronym] || [];
 			
 			if (acronymMatches.length === 1) {
 				// Single match - relatively safe to use
@@ -182,73 +213,6 @@ var MatchingUtils = {
 		} else if (zoteroAcronym) {
 			debugLog(`  CORE Strategy 5: Skipping acronym match "${zoteroAcronym}" (< 4 chars, too ambiguous)`);
 		}
-		
-		return null;
-	},
-
-	/**
-	 * Match a journal title against SJR rankings database
-	 * Uses multiple strategies with debug logging
-	 */
-	matchSjrJournal: function(publicationTitle, enableDebug = false) {
-		var debugLog = enableDebug ? function(msg) { Zotero.debug("[MATCH DEBUG] " + msg); } : function() {};
-		
-		debugLog(`SJR matching: "${publicationTitle}"`);
-		
-		// Strategy 1: Exact match (normalized)
-		debugLog(`  SJR Strategy 1: Trying exact normalized match`);
-		var normalized = this.normalizeString(publicationTitle.toLowerCase());
-		for (var title in sjrRankings) {
-			var normalizedSJR = this.normalizeString(title);
-			if (normalizedSJR === normalized) {
-				debugLog(`  ✓ SJR exact match: "${title}" (Q${sjrRankings[title].quartile})`);
-				return sjrRankings[title];
-			}
-		}
-		debugLog(`  No SJR exact match`);
-		
-		// Strategy 2: Cleaned title match (without publisher info after comma)
-		debugLog(`  SJR Strategy 2: Trying cleaned title match`);
-		var cleaned = this.normalizeString(this.cleanConferenceTitle(publicationTitle));
-		for (var title in sjrRankings) {
-			var cleanedSJR = this.normalizeString(title.split(',')[0].trim());
-			if (cleanedSJR === cleaned && cleaned.length > 10) {
-				debugLog(`  ✓ SJR cleaned match: "${title}" (Q${sjrRankings[title].quartile})`);
-				return sjrRankings[title];
-			}
-		}
-		debugLog(`  No SJR cleaned match`);
-		
-		// Strategy 3: Word overlap for journals with extra words
-		debugLog(`  SJR Strategy 3: Trying word overlap`);
-		var words = cleaned.split(' ').filter(function(w) { return w.length > 3; });
-		
-		for (var title in sjrRankings) {
-			var cleanedSJR = this.normalizeString(title.split(',')[0].trim());
-			var sjrWords = cleanedSJR.split(' ').filter(function(w) { return w.length > 3; });
-			
-			// Count matching words
-			var matchCount = 0;
-			for (var i = 0; i < sjrWords.length; i++) {
-				if (words.indexOf(sjrWords[i]) !== -1) {
-					matchCount++;
-				}
-			}
-			
-			// Calculate overlap percentages
-			var sjrOverlap = sjrWords.length > 0 ? matchCount / sjrWords.length : 0;
-			var searchOverlap = words.length > 0 ? matchCount / words.length : 0;
-			
-			// Use stricter criteria to avoid false positives
-			// Require: 5+ significant words AND 85%+ overlap in both directions
-			if (sjrWords.length >= 5 && sjrOverlap >= 0.85 && searchOverlap >= 0.85) {
-				debugLog(`  ✓ SJR word overlap match: "${title}" (Q${sjrRankings[title].quartile})`);
-				debugLog(`    Matched ${matchCount}/${sjrWords.length} SJR words (${(sjrOverlap*100).toFixed(0)}%)`);
-				debugLog(`    Matched ${matchCount}/${words.length} search words (${(searchOverlap*100).toFixed(0)}%)`);
-				return sjrRankings[title];
-			}
-		}
-		debugLog(`  No SJR word overlap match`);
 		
 		return null;
 	}

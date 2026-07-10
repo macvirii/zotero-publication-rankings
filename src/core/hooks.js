@@ -15,7 +15,7 @@
  * - Easier to maintain and test
  */
 
-/* global Zotero, ZoteroRankings, ManualOverrides, RankingActions, Services */
+/* global Zotero, ZoteroRankings, ManualOverrides, RankingActions, Services, APP_SHUTDOWN, ADDON_DISABLE, ADDON_UNINSTALL */
 var Hooks = {
 	/**
 	 * Plugin startup - called when extension is loaded
@@ -73,9 +73,11 @@ var Hooks = {
 		
 		Zotero.debug("Publication Rankings: Shutting down plugin");
 		
-		// Clean up ranking entries from Extra fields before unload
-		Zotero.debug("Publication Rankings: Cleaning up ranking entries from Extra fields");
-		await RankingActions.cleanupAllRankingsFromExtra();
+		// Clean up ranking entries only when the plugin is disabled or uninstalled
+		if (reason === ADDON_DISABLE || reason === ADDON_UNINSTALL) {
+			Zotero.debug("Publication Rankings: Cleaning up ranking entries from Extra fields");
+			await RankingActions.cleanupAllRankingsFromExtra();
+		}
 		
 		if (Zotero.SJRCoreRankings) {
 			// Remove UI from all windows and clean up observers

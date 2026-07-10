@@ -229,6 +229,9 @@ ZoteroRankings = {
 		if (this.debugModeObserverID) {
 			unregisterPrefObserver(this.debugModeObserverID);
 		}
+		if (this.enableBadgesObserverID) {
+			unregisterPrefObserver(this.enableBadgesObserverID);
+		}
 		
 		// Unregister all database preference observers
 		for (var dbId in this.databaseObserverIDs) {

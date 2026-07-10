@@ -105,7 +105,7 @@ function install(data, reason) {
  */
 function startup({ id, version, rootURI }) {
 	loadModules(rootURI);
-	Hooks.onStartup({ id, version, rootURI });
+	return Hooks.onStartup({ id, version, rootURI });
 }
 
 /**
@@ -138,7 +138,8 @@ function onMainWindowUnload({ window }) {
  * @param {number} reason - Shutdown reason constant
  */
 function shutdown({ id, version, rootURI }, reason) {
-	Hooks.onShutdown({ id, version, rootURI }, reason);
+	// Return the promise so Zotero can await the async Extra-field cleanup
+	return Hooks.onShutdown({ id, version, rootURI }, reason);
 }
 
 /**

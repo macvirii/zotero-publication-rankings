@@ -29,7 +29,7 @@ var absDatabase = {
 	* Main Matching Function
     * @param {string} title - Publication title to match
 	* @param {Function} debugLog - Debug logging function
-	* @returns {string|null} Ranking string (e.g., "1" or "4*") or N/A if not found
+	* @returns {string|null} Ranking string (e.g., "1" or "4*") or null if not found
  */
 	match: function (title, debugLog) {
 		debugLog(`[ABS] Retrieving ranking from database...`);
@@ -37,16 +37,14 @@ var absDatabase = {
 
 		var exact = title.trim().toLowerCase();
 		var entry = absRankings[exact] || this.normalizedTitleIndex[MatchingUtils.normalizeString(title)];
-		var result = entry ? entry.abs : '';
-		if (result) {
+		var result = entry ? entry.abs : null;
+		if (result && result !== 'N/A') {
 			debugLog(`[ABS] ✓ Journal Found -> ${result}`);
+			return result;
 		}
 
-		if ((result == 'N/A') || (!result)) {
-			debugLog('[ABS] Journal NOT found: "${title}"');
-		}
-
-		return result;
+		debugLog(`[ABS] Journal NOT found: "${title}"`);
+		return null;
 	}
 }
 

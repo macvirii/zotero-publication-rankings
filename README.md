@@ -30,7 +30,7 @@ Parts of this fork were migrated, refactored, and documented with AI assistance.
 
 - **Custom "Ranking" Column**: See rankings at a glance without modifying your metadata
 - **SJR Journal Rankings**: 30,818+ journals with quartiles (Q1-Q4) and SJR scores
-- **JCR Rankings**: Optional local Journal Citation Reports quartiles and Journal Impact Factor values from an authorized export
+- **JCR Rankings**: Journal Citation Reports quartiles and Journal Impact Factor values
 - **CORE Conference Rankings**: 2,173+ conferences (A*, A, B, C) with historical editions
 - **ABS Rankings**: 1,822 journals
 - **ABDC Rankings**: 2,651 journals from the Australian Business Deans Council Journal Quality List
@@ -166,7 +166,7 @@ python extract_sjr.py
 # Step 2: Extract CORE rankings (from full_CORE.csv with historical data)
 python extract_full_core.py
 
-# Step 3: Extract JCR rankings when you have an authorized local export (optional)
+# Step 3: Extract JCR rankings from a local export (optional)
 python extract_jcr.py source-data/jcr_export.csv
 
 # Step 4: Extract ABS rankings (from source-data/ABSRanking2024_Fulllist.csv)
@@ -203,7 +203,7 @@ cd zotero-publication-rankings
 ./build.sh
 ```
 
-This creates the `.xpi` file ready for installation (e.g., `dist/publication-rankings-0.3.4.xpi`).
+This creates the `.xpi` file ready for installation (e.g., `dist/publication-rankings-0.3.5.xpi`).
 
 ## Project Structure
 
@@ -332,7 +332,7 @@ The build scripts copy these source modules into the XPI root in the order requi
 ## Data Sources
 
 - **SJR 2024**: [SCImago Journal & Country Rank](https://www.scimagojr.com/)
-- **JCR**: [Journal Citation Reports](https://jcr.clarivate.com/) local exports are supported through `extract_jcr.py`; do not publish generated JCR data unless your license permits it
+- **JCR**: [Journal Citation Reports](https://jcr.clarivate.com/) exports are supported through `extract_jcr.py`
 - **CORE 2023**: [Computing Research and Education](http://portal.core.edu.au/conf-ranks/)
 - **ABS 2024**: [ABS Ranking](https://journalranking.org)
 - **ABDC 2025**: [ABDC Journal Quality List](https://abdc.edu.au/abdc-journal-quality-list/)

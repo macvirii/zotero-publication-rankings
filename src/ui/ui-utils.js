@@ -151,6 +151,7 @@ var UIUtils = {
 	 * @returns {number} Sort value
 	 */
 	getRankingSortValue: function (id, ranking) {
+		if (id === 'ft50') return 900;
 		if ((!ranking) || (ranking == 'N/A')) return 0;
 
 			switch (id) {
@@ -190,13 +191,13 @@ var UIUtils = {
 				if (ranking.startsWith('Nat C')) return 150;
 				if (ranking.startsWith('Nat ')) return 100;
 
-				// ABS Ranking
-				if (ranking.startsWith('4*')) return 249;
-				if (ranking.startsWith('4')) return 248;
-				if (ranking.startsWith('3')) return 247;
-				if (ranking.startsWith('2')) return 246;
-				if (ranking.startsWith('1')) return 245;
-
+				break;
+			case "abs":
+				if (ranking.startsWith('4*')) return 1000;
+				if (ranking.startsWith('4')) return 850;
+				if (ranking.startsWith('3')) return 650;
+				if (ranking.startsWith('2')) return 450;
+				if (ranking.startsWith('1')) return 300;
 				break;
 			case "qualisCapes":
 				if (ranking.startsWith('A1')) return 980;
@@ -232,6 +233,7 @@ var UIUtils = {
 				// Other/Unknown rankings
 				return 50;
 		}
+		return 0;
 	},
 
 	/**
@@ -321,6 +323,7 @@ var UIUtils = {
 				if (ranking === 'R') return 'Nova CAPES R - Regular (2 points)';
 				if (ranking === 'F') return 'Nova CAPES F - Fraco (1 point)';
 				if (ranking === 'I') return 'Nova CAPES I - Insuficiente (0 points)';
+				break;
 			case "spell":
 				if (ranking === 'Top 10%') return 'SPELL - Top 10% by impact';
 				if (ranking === '10-40%') return 'SPELL - Between top 10% and 40% by impact';
@@ -342,6 +345,7 @@ var UIUtils = {
 			case "qualisCapes": return "Qualis CAPES";
 			case "capesNova": return "Nova CAPES";
 			case "spell": return "SPELL";
+			case "Manual": return "Manual";
 			default: return id ? id.toUpperCase() : '';
 		}
 	},

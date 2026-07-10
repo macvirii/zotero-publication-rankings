@@ -40,7 +40,7 @@ DatabaseRegistry.register({
 	id: 'ft50',
 	name: 'FT50 Journal Ranking',
 	prefKey: 'enableFT50',
-	priority: 102,
+	priority: 106,
 	matcher: function (title, debugLog) {
 		return ft50Database.match(title, debugLog);
 	}

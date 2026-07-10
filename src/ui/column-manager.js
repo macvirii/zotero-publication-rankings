@@ -46,7 +46,6 @@ var ColumnManager = {
 				pluginID: 'publication-rankings@zotero.org',
 				dataProvider: this.dataProvider.bind(this),
 				renderCell: this.renderCell.bind(this),
-				sortingKey: this.sortingKey.bind(this),
 				zoteroPersist: ['width', 'ordinal', 'hidden', 'sortDirection']
 			});
 			
@@ -96,7 +95,7 @@ var ColumnManager = {
 		}
 		
 		// Convert structured data to display string
-		// rankingData format: [{database: "sjr", ranking: "Q1 0.85", color: "#color"}, ...]
+		// rankingData format: [{id: "sjr", rank: "Q1 0.85", color: "#color"}, ...]
 		const ranking = this.formatRankingForDisplay(rankingData);
 		
 		// Zotero sorts alphabetically by dataProvider return value
@@ -124,25 +123,24 @@ var ColumnManager = {
 	 * @returns {HTMLElement} Rendered cell element
 	 * 
 	 * @example
-	 * var cell = ColumnManager.renderCell(0, "8999|Q1 0.85", column, false, doc);
+	 * var cell = ColumnManager.renderCell(0, "8999|SJR: Q1 0.85&&123", column, false, doc);
 	 */
 	renderCell: function(index, data, column, isFirstColumn, doc) {
 		// Create cell element
 		const cell = doc.createElement('span');
 		cell.className = `cell ${column.className}`;
 
-		let displayText = data;
-		// data always has a value (itemID)
-		// Extract itemID
-		let itemID = displayText.split('&&')[1];
-				
-		// Strip the sort prefix (format is "sortValue|ranking")
-		// This is also the default text if the graphica rendering fails
-		displayText = displayText.split('&&')[0].split('|')[1];
+		// Extract the item ID after the final delimiter because ranking text can
+		// contain both "|" and "&&".
+		var itemDelimiterIndex = data.lastIndexOf('&&');
+		var sortDelimiterIndex = data.indexOf('|');
+		var itemID = itemDelimiterIndex === -1 ? '' : data.substring(itemDelimiterIndex + 2);
+		var displayStart = sortDelimiterIndex === -1 ? 0 : sortDelimiterIndex + 1;
+		var displayEnd = itemDelimiterIndex === -1 ? data.length : itemDelimiterIndex;
+		var displayText = data.substring(displayStart, displayEnd);
 
-		var content = displayText;
-		// Failsafe in case the code below does not work
-		cell.innerHTML = content;
+		// Failsafe in case the graphical rendering below does not work
+		cell.textContent = displayText;
 
 		var rankingData = this.rankingCache.get(String(itemID));
 		if (!rankingData) {
@@ -153,33 +151,37 @@ var ColumnManager = {
 			}
 		}
 
-		if (rankingData) {
+		if (rankingData && rankingData.length) {
 			// Determine the right font colour
+			// rankingData is already in database priority order (SJR first)
 			var bItems = [];
-			content = '';
-			rankingData.slice().reverse().forEach(function (line) {
-				var e = line.split(',');
+			rankingData.forEach(function (entry) {
+				var label = UIUtils.getDatabaseLabel(entry.id).trim();
+				var rank = entry.rank == null ? '' : String(entry.rank).trim();
 				let b = {
-					color: e[2],
-					text: !e[1] || e[1].trim() === '' ?
-						' ' + UIUtils.getDatabaseLabel(e[0]).trim() + ' ' :
-						UIUtils.getDatabaseLabel(e[0]).trim() + ': ' + e[1].trim()
+					color: entry.color,
+					text: rank ? label + ': ' + rank : label
 				};
 				bItems.push(b);
 			});
 
 			// Just show text
 			if (!getPref('enableBadges')) {
-				bItems.forEach(function (it) {
+				cell.textContent = '';
+				bItems.forEach(function (it, itemIndex) {
 					var { color, text } = it;
-					content = content + `<span style="color: ${color}; font-weight: bold;">${text}</span> `;
+					var textSpan = doc.createElement('span');
+					textSpan.style.color = color;
+					textSpan.style.fontWeight = 'bold';
+					textSpan.textContent = text;
+					cell.appendChild(textSpan);
+					if (itemIndex < bItems.length - 1) {
+						cell.appendChild(doc.createTextNode(' '));
+					}
 				});
-
-				content = content.trim();
-				cell.innerHTML = content;
 			} else {
-			// create badges with text in them
-				cell.innerHTML = '';
+				// create badges with text in them
+				cell.textContent = '';
 			
 				let container = doc.createElement('span');
 				container.style.display = 'inline-flex'; // arrange badges side by side
@@ -224,8 +226,9 @@ var ColumnManager = {
 				});
 				cell.appendChild(container);
 			}
-			return cell;
 		}
+
+		return cell;
 	},
 
 	getBestSortValue: function(rankingData) {
@@ -235,41 +238,15 @@ var ColumnManager = {
 
 		var bestValue = 0;
 		for (var i = 0; i < rankingData.length; i++) {
-			var fields = rankingData[i].split(',');
-			if (fields.length >= 2) {
-				var sortValue = UIUtils.getRankingSortValue(fields[0], fields[1].trim());
-				if (sortValue > bestValue) {
-					bestValue = sortValue;
-				}
+			var entry = rankingData[i];
+			var rank = entry.rank == null ? '' : String(entry.rank).trim();
+			var databaseID = entry.id === 'Manual' ? 'sjr' : entry.id;
+			var sortValue = UIUtils.getRankingSortValue(databaseID, rank) || 0;
+			if (sortValue > bestValue) {
+				bestValue = sortValue;
 			}
 		}
 		return bestValue;
-	},
-	
-	/**
-	 * Sorting key callback for the ranking column
-	 * Note: Zotero appears to sort by dataProvider value instead,
-	 * so we use sort prefix in dataProvider. Keeping this for documentation.
-	 * 
-	 * @param {Object} item - Zotero item
-	 * @returns {number} Numeric sort value (higher = better ranking)
-	 * 
-	 * @example
-	 * var sortKey = ColumnManager.sortingKey(item);
-	 * // Returns: 1000 (for A*), 500 (for Q1), etc.
-	 */
-	sortingKey: function(item) {
-		const itemID = item.id;
-		let ranking;
-		
-		if (this.rankingCache.has(itemID)) {
-			ranking = this.rankingCache.get(itemID);
-		} else {
-			ranking = RankingEngine.getRanking(item);
-			this.rankingCache.set(itemID, ranking);
-		}
-		
-		return UIUtils.getRankingSortValue(itemID, ranking);
 	},
 	
 	/**
@@ -281,7 +258,7 @@ var ColumnManager = {
 	 * ColumnManager.clearCache(12345);
 	 */
 	clearCache: function(itemID) {
-		this.rankingCache.delete(itemID);
+		this.rankingCache.delete(String(itemID));
 	},
 	
 	/**
@@ -305,7 +282,7 @@ var ColumnManager = {
 	 * 
 	 * @example
 	 * var rankingData = ColumnManager.getCachedRanking(12345);
-	 * // Returns: ["sjr,Q1 0.85,#color", "core,A*,#color"] or undefined
+	 * // Returns: [{id: "sjr", rank: "Q1 0.85", color: "#2E7D32"}] or undefined
 	 */
 	getCachedRanking: function(itemID) {
 		return this.rankingCache.get(String(itemID));
@@ -319,7 +296,7 @@ var ColumnManager = {
 	 * @returns {string} Formatted string for display
 	 * 
 	 * @example
-	 * formatRankingForDisplay([{database: "sjr", ranking: "Q1 0.85", color: "#color"}])
+	 * formatRankingForDisplay([{id: "sjr", rank: "Q1 0.85", color: "#2E7D32"}])
 	 * // Returns: "SJR: Q1 0.85"
 	 */
 	formatRankingForDisplay: function(rankingData) {
@@ -327,42 +304,15 @@ var ColumnManager = {
 			return '';
 		}
 		
-		// Parse the comma-separated strings and format for display
-		// Format: "sjr,Q1 0.85,#color" -> "SJR: Q1 0.85"
 		var parts = [];
 		for (var i = 0; i < rankingData.length; i++) {
 			var entry = rankingData[i];
-			if (typeof entry === 'string') {
-				// Parse comma-separated format: "database,ranking,color"
-				var fields = entry.split(',');
-				if (fields.length >= 2) {
-					var db = UIUtils.getDatabaseLabel(fields[0]);
-					var rank = fields[1].trim();
-					parts.push(db + ': ' + rank);
-				}
-			}
+			var label = UIUtils.getDatabaseLabel(entry.id);
+			var rank = entry.rank == null ? '' : String(entry.rank).trim();
+			parts.push(rank ? label + ': ' + rank : label);
 		}
 		
 		return parts.join(' ');
-	},
-	
-	/**
-	 * Get cached ranking for an item, formatted for display
-	 * Used by other modules that need the ranking string
-	 * 
-	 * @param {number} itemID - Zotero item ID
-	 * @returns {string|undefined} Formatted ranking string or undefined
-	 * 
-	 * @example
-	 * var ranking = ColumnManager.getCachedRankingForItem(12345);
-	 * // Returns: "SJR: Q1 0.85 CORE: A*" or undefined
-	 */
-	getCachedRankingForItem: function(itemID) {
-		var rankingData = this.rankingCache.get(String(itemID));
-		if (!rankingData) {
-			return undefined;
-		}
-		return this.formatRankingForDisplay('', rankingData);
 	},
 	
 	/**
@@ -370,10 +320,10 @@ var ColumnManager = {
 	 * Now stores structured data (array) instead of string
 	 * 
 	 * @param {number} itemID - Zotero item ID
-	 * @param {Array} rankingData - Array of ranking strings to cache
+	 * @param {Array} rankingData - Array of ranking objects to cache
 	 * 
 	 * @example
-	 * ColumnManager.setCachedRanking(12345, ["sjr,Q1 0.85,#color"]);
+	 * ColumnManager.setCachedRanking(12345, [{id: "sjr", rank: "Q1 0.85", color: "#2E7D32"}]);
 	 */
 	setCachedRanking: function(itemID, rankingData) {
 		this.rankingCache.set(String(itemID), rankingData);

@@ -39,15 +39,17 @@ var DatabaseRegistry = {
 		}
 
 		// Store the database configuration
+		// Note: priority 0 is valid (SJR), so a plain || fallback would break it
+		var priority = typeof config.priority === 'number' ? config.priority : 999;
 		this.databases.set(config.id, {
 			id: config.id,
 			name: config.name,
 			prefKey: config.prefKey || null,
-			priority: config.priority || 999,
+			priority: priority,
 			matcher: config.matcher
 		});
 
-		Zotero.debug(`Publication Rankings: Registered database '${config.name}' (priority ${config.priority || 999})`);
+		Zotero.debug(`Publication Rankings: Registered database '${config.name}' (priority ${priority})`);
 	},
 
 	/**

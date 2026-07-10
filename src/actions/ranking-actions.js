@@ -18,7 +18,32 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* global Zotero, RankingEngine, ManualOverrides, ColumnManager, Services */
+/* global Zotero, RankingEngine, ManualOverrides, ColumnManager, Services, UIUtils */
+
+var RANKING_DATABASE_LABELS = [
+	'SJR', 'JCR', 'CORE', 'ABS', 'ABDC', 'FT50', 'Qualis CAPES',
+	'Nova CAPES', 'SPELL', 'Manual', 'QUALISCAPES', 'CAPESNOVA', 'MANUAL'
+];
+
+/**
+ * Build the regex patterns matching every Extra-field ranking line this plugin
+ * (or an older version of it) may have written. Shared by dedup and cleanup so
+ * the two paths never drift apart.
+ *
+ * @returns {Array<RegExp>} Patterns matching plugin-written ranking lines
+ */
+function buildRankingLinePatterns() {
+	var escaped = RANKING_DATABASE_LABELS.map(function(label) {
+		return label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	});
+	var titlePattern = `(?:${escaped.join('|')})`;
+	return [
+		new RegExp(`^Ranking: *.+ *\\(${titlePattern}\\)`, 'i'),  // current: "Ranking: Q1 (SJR)"
+		new RegExp(`^Ranking \\(${titlePattern}\\): .+`, 'i'),    // legacy:  "Ranking (SJR): Q1"
+		new RegExp(`^.+ ranking \\(${titlePattern}\\)`, 'i'),     // legacy:  "Q1 ranking (SJR)"
+		/^Ranking: FT50$/i                                        // label-only FT50 form
+	];
+}
 
 /**
  * Ranking Actions - Handles all user-triggered operations
@@ -256,12 +281,11 @@ var RankingActions = {
 		if (result && input.value) {
 			var ranking = input.value.trim();
 			await ManualOverrides.set(publicationTitle, ranking);
-			
-			// Clear cache for affected items and refresh
-			for (var item of items) {
-				ColumnManager.clearCache(item.id);
-			}
-			
+
+			// Overrides are keyed by publication title, so any item sharing this
+			// title is affected - not just the selection. Clear the whole cache.
+			ColumnManager.clearAllCache();
+
 			Zotero.Notifier.trigger('refresh', 'itemtree', []);
 			
 			await Zotero.alert(
@@ -314,11 +338,10 @@ var RankingActions = {
 		}
 		
 		if (cleared > 0) {
-			// Clear cache and refresh
-			for (var item of items) {
-				ColumnManager.clearCache(item.id);
-			}
-			
+			// Overrides are keyed by publication title, so any item sharing these
+			// titles is affected - not just the selection. Clear the whole cache.
+			ColumnManager.clearAllCache();
+
 			Zotero.Notifier.trigger('refresh', 'itemtree', []);
 			
 			await Zotero.alert(
@@ -402,20 +425,14 @@ var RankingActions = {
 					}
 				}
 				
-				// Convert array format to Extra field format
-				// rankingData format: ["sjr,Q1 0.85,#color", "core,A*,#color"]
+				// Convert structured ranking objects to Extra field format
 				var extraData = [];
 				for (var j = 0; j < rankingData.length; j++) {
 					var entry = rankingData[j];
-					if (typeof entry === 'string') {
-						var parts = entry.split(',');
-						if (parts.length >= 2) {
-							extraData.push({
-								database: parts[0].toUpperCase(), // "SJR", "CORE", "ABS", "FT50"
-								ranking: parts[1].trim()           // "Q1 0.85", "A*"
-							});
-						}
-					}
+					extraData.push({
+						database: UIUtils.getDatabaseLabel(entry.id),
+						ranking: entry.rank == null ? '' : String(entry.rank).trim()
+					});
 				}
 				
 				if (extraData.length > 0) {
@@ -487,17 +504,8 @@ var RankingActions = {
 			
 			var extras = extra.split('\n');
 			
-			// Build regex pattern for all databases
-			var dbNames = rankingData.map(d => d.database.trim());
-			var titlePattern = `(?:${dbNames.join('|')})`;
-			
 			// Patterns to match existing ranking entries (multiple formats for compatibility)
-			// Match with or without optional date stamps for backward compatibility
-			var patt_current = new RegExp(`^Ranking: *.+ *\\(${titlePattern}\\)`, 'i');
-			var patt_old1 = new RegExp(`^Ranking \\(${titlePattern}\\): .+`, 'i');
-			var patt_old2 = new RegExp(`^.+ ranking \\(${titlePattern}\\)`, 'i');
-			
-			var patterns = [patt_current, patt_old1, patt_old2];
+			var patterns = buildRankingLinePatterns();
 			
 			// Remove old ranking lines that match any pattern
 			var filteredExtras = extras.filter(function(line) {
@@ -514,7 +522,10 @@ var RankingActions = {
 			// Add new ranking entries (no date stamp - rankings are relatively stable)
 			for (var i = 0; i < rankingData.length; i++) {
 				var data = rankingData[i];
-				var newEntry = `Ranking: ${data.ranking} (${data.database})`;
+				var rank = data.ranking == null ? '' : String(data.ranking).trim();
+				var newEntry = rank ?
+					`Ranking: ${rank} (${data.database})` :
+					`Ranking: ${data.database}`;
 				
 				// Insert before BBT citation key if it exists
 				var bbtCitekeyPattern = /^Citation Key: \S+/i;
@@ -565,33 +576,35 @@ var RankingActions = {
 			
 			var cleaned = 0;
 			var processed = 0;
+			var itemsToSave = [];
 			
-			// Pattern to match any ranking entry
-			// Matches: "Ranking: ... (...)" with optional date stamp
-			var rankingPattern = /^Ranking: *.+ *\(.+\)/i;
-			
+			// Match only ranking entries written by this plugin (same patterns as dedup)
+			var patterns = buildRankingLinePatterns();
+
 			for (var i = 0; i < allItems.length; i++) {
 				var item = allItems[i];
-				
+
 				if (!item.isRegularItem()) {
 					continue;
 				}
-				
+
 				var extra = item.getField('extra');
 				if (!extra) {
 					continue;
 				}
-				
+
 				var extras = extra.split('\n');
 				var filteredExtras = extras.filter(function(line) {
-					return !rankingPattern.test(line);
+					return !patterns.some(function(pattern) {
+						return pattern.test(line);
+					});
 				});
 				
 				// Only save if something was removed
 				if (filteredExtras.length !== extras.length) {
 					var newExtra = filteredExtras.join('\n');
 					item.setField('extra', newExtra);
-					await item.saveTx();
+					itemsToSave.push(item);
 					cleaned++;
 					
 					Zotero.debug(`Publication Rankings: Cleaned item ${item.id}: removed ${extras.length - filteredExtras.length} ranking entries`);
@@ -603,6 +616,14 @@ var RankingActions = {
 				if (processed % 100 === 0) {
 					Zotero.debug(`Publication Rankings: Cleanup progress: ${processed}/${allItems.length} items processed, ${cleaned} cleaned`);
 				}
+			}
+
+			if (itemsToSave.length > 0) {
+				await Zotero.DB.executeTransaction(async function() {
+					for (var j = 0; j < itemsToSave.length; j++) {
+						await itemsToSave[j].save();
+					}
+				});
 			}
 			
 			Zotero.debug(`Publication Rankings: Cleanup complete - Processed ${processed} items, cleaned ${cleaned} items`);

@@ -18,7 +18,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* global Zotero, DatabaseRegistry, ManualOverrides */
+/* global Zotero, DatabaseRegistry, ManualOverrides, UIUtils */
 
 /**
  * Ranking matching engine - handles all ranking lookup logic
@@ -83,42 +83,14 @@ var RankingEngine = {
 				debugLog(`Matcher in ${db.name} return rank: ${rank}`);
 				if (rank) {
 					debugLog(`✓ FOUND in ${db.name}: ${rank}`);
-					switch (db.id) {
-						case 'sjr':
-							rank = 'SJR: ' + rank;
-							break;
-						case 'jcr':
-							rank = 'JCR: ' + rank;
-							break;
-						case 'core':
-							rank = 'CORE: ' + rank;
-							break;
-						case 'abs':
-							rank = 'ABS: ' + rank;
-							break;
-						case 'abdc':
-							rank = 'ABDC: ' + rank;
-							break;
-						case 'ft50':
-							rank = 'FT50';
-							break;
-						case 'qualisCapes':
-							rank = 'Qualis CAPES: ' + rank;
-							break;
-						case 'capesNova':
-							rank = 'Nova CAPES: ' + rank;
-							break;
-						case 'spell':
-							rank = 'SPELL: ' + rank;
-							break;
-					}
-
-					ranking = rank + ' ' + ranking;
+					var label = UIUtils.getDatabaseLabel(db.id);
+					var entry = rank.trim() ? label + ': ' + rank : label;
+					ranking = ranking ? ranking + ' ' + entry : entry;
 					debugLog(`Ranking = ${ranking}`);
 				}
 			}
 
-			if (ranking) {
+			if (!ranking) {
 				debugLog(`✗ NO MATCH FOUND in any database for "${publicationTitle}"`);
 			}
 			return ranking;
@@ -130,19 +102,15 @@ var RankingEngine = {
 	},
 
 	/**
-	 * Get the ranking of a Zotero Item as an array of comma-separated strings
-	 * The strings are formed by the following parts:
-	 *		0: database id
-	 *		1: ranking
-	 *		2: ranking colour
+	 * Get the rankings of a Zotero item as structured objects
 	 *		
 	 * @param {Object} item - Zotero item object
 	 * @param {boolean} enableDebug - Whether to log detailed matching information
-	 * @returns {Array} strings - Array of string or empty array
+	 * @returns {Array} Array of {id, rank, color} objects or an empty array
 	 * 
 	 * @example
 	 * var ranking = RankingEngine.getRankingArray(item, false);
-	 * // Returns: ["sjr,Q1 0.85,black", "core,A*,red"] or []
+	 * // Returns: [{id: "sjr", rank: "Q1 0.85", color: "#2E7D32"}] or []
 	 */
 	getRankingArray: function (item, enableDebug = false) {
 		try {
@@ -174,7 +142,7 @@ var RankingEngine = {
 			const manualOverride = ManualOverrides.get(publicationTitle);
 			if (manualOverride) {
 				debugLog(`✓ MANUAL OVERRIDE: "${manualOverride}"`);
-				m.push(`Manual,"${manualOverride}",#757575`);
+				m.push({ id: 'Manual', rank: manualOverride, color: '#757575' });
 				return m;
 			}
 			debugLog(`No manual override found`);
@@ -191,8 +159,11 @@ var RankingEngine = {
 				var rank = db.matcher(normalizedTitle, debugLog, item);
 				if (rank) {
 					debugLog(`✓ FOUND in ${db.name}: ${rank}`);
-					var a = [db.id, rank, UIUtils.getRankingColor(db.id, rank)];
-					m.push(a.join(','));
+					m.push({
+						id: db.id,
+						rank: rank,
+						color: UIUtils.getRankingColor(db.id, rank)
+					});
 				}
 			}
 

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.5] - 2026-07-10
+- Fixed ranking-cache invalidation so auto-update and manual-override changes refresh the column immediately.
+- Fixed SJR database priority so it is checked first again (registry treated priority 0 as unset).
+- Fixed manual overrides so they sort by their ranking value and display without stray quotes; values containing commas or other delimiters no longer corrupt the column.
+- Fixed ABS sorting (4* through 1 now have proper tiers) and gave FT50 journals a sort tier.
+- Extra-field cleanup now runs only on disable/uninstall (plugin updates no longer wipe rankings), only removes lines this plugin wrote, and saves in a single transaction.
+- Extra-field entries now use canonical database labels (e.g. "Qualis CAPES" instead of "QUALISCAPES").
+- CORE matching now uses a prebuilt index (much faster) and respects the debug-logging preference.
+- Replaced innerHTML cell rendering with DOM construction and hardened cell parsing.
+- Fixed the enableBadges preference observer leaking on plugin disable, and removed dead code (unused SJR scan matcher, broken sortingKey callback).
+
 ## [0.3.4] - 2026-06-14
 - Documentation now reflects the current Zotero 9 fork, release locations, source-data layout, and build output paths.
 - Added optional local JCR ranking support, including CSV/XLSX extraction, database matching, preferences, badges, and build packaging.
