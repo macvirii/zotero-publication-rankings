@@ -1,0 +1,16 @@
+name: Semgrep CE
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  semgrep:
+    name: Semgrep CE scan
+    runs-on: [linux-x64, dotnet, node]
+    container:
+      image: semgrep/semgrep:1.168.0
+    steps:
+      - uses: actions/checkout@v4
+      - run: semgrep scan --config auto --error .
