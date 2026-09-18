@@ -1,13 +1,13 @@
 # Installation Guide
 
-## Publication Rankings for Zotero 9
+## Publication Rankings for Zotero 10
 
 **Original author:** Ben Stephens  
 **Fork maintainer:** macvirii  
 **License:** GNU General Public License v3.0 (GPLv3)  
 **Repository:** https://github.com/macvirii/zotero-publication-rankings
 
-This fork has been validated only on Zotero 9.
+Compatibility metadata allows Zotero 7 through 10.0.x, including Zotero 10.0.3. Previous runtime validation was on Zotero 9; Zotero 10.0.3 runtime validation is pending.
 
 ## Quick Start
 
