@@ -3,12 +3,12 @@
 		"publication-rankings@zotero.org": {
 			"updates": [
 				{
-					"version": "0.3.5",
-					"update_link": "https://github.com/macvirii/zotero-publication-rankings/releases/download/v0.3.5/publication-rankings-0.3.5.xpi",
+					"version": "0.3.6",
+					"update_link": "https://github.com/macvirii/zotero-publication-rankings/releases/download/v0.3.6/publication-rankings-0.3.6.xpi",
 					"applications": {
 						"zotero": {
 							"strict_min_version": "7.0",
-							"strict_max_version": "9.*"
+							"strict_max_version": "10.0.*"
 						}
 					}
 				}

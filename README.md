@@ -1,10 +1,10 @@
-# Publication Rankings for Zotero 9
+# Publication Rankings for Zotero 10
 
 [![GitHub release](https://img.shields.io/github/v/release/macvirii/zotero-publication-rankings.svg?style=for-the-badge)](https://github.com/macvirii/zotero-publication-rankings/releases/latest) [![Downloads](https://img.shields.io/github/downloads/macvirii/zotero-publication-rankings/total.svg?style=for-the-badge&color=forestgreen&cacheSeconds=3600)](https://github.com/macvirii/zotero-publication-rankings/releases) [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg?style=for-the-badge)](https://www.gnu.org/licenses/gpl-3.0)
 
 A Zotero plugin that automatically displays journal and conference rankings in a custom column in your Zotero library.
 
-This fork has been validated only on Zotero 9.
+Compatibility metadata allows Zotero 7 through 10.0.x, including Zotero 10.0.3. Previous runtime validation was on Zotero 9; Zotero 10.0.3 runtime validation is pending.
 
 ## Fork Notice
 
@@ -203,7 +203,7 @@ cd zotero-publication-rankings
 ./build.sh
 ```
 
-This creates the `.xpi` file ready for installation (e.g., `dist/publication-rankings-0.3.5.xpi`).
+This creates the `.xpi` file ready for installation (e.g., `dist/publication-rankings-0.3.6.xpi`).
 
 ## Project Structure
 

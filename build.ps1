@@ -7,7 +7,7 @@
 # XPI files are just ZIP files with a different extension
 
 $pluginName = "publication-rankings"
-$version = "0.3.5"
+$version = "0.3.6"
 
 # Get the plugin directory
 $pluginDir = $PSScriptRoot

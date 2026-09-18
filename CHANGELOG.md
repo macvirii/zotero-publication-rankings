@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.6] - 2026-09-18
+- Updated plugin and automatic-update compatibility metadata to allow Zotero 10.0.x, including Zotero 10.0.3.
+- Updated both build scripts to package version 0.3.6.
+
 ## [0.3.5] - 2026-07-10
 - Fixed ranking-cache invalidation so auto-update and manual-override changes refresh the column immediately.
 - Fixed SJR database priority so it is checked first again (registry treated priority 0 as unset).
