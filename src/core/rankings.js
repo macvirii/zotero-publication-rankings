@@ -160,11 +160,6 @@ ZoteroRankings = {
 
 	// Notifier callback - refresh item tree when items are added/modified (if autoUpdate enabled)
 	notify: async function(event, type, ids, extraData) {
-		// Check if auto-update is enabled
-		if (!getPref('autoUpdate')) {
-			return;
-		}
-		
 		if (event !== 'add' && event !== 'modify') {
 			return;
 		}
@@ -172,6 +167,10 @@ ZoteroRankings = {
 		// Clear cache for modified items
 		for (let id of ids) {
 			ColumnManager.clearCache(id);
+		}
+		// Disabling automatic repaint must not retain stale ranks/provenance.
+		if (!getPref('autoUpdate')) {
+			return;
 		}
 		
 		// Trigger refresh for affected items
@@ -206,6 +205,7 @@ ZoteroRankings = {
 		// Add menus using MenuManager
 		MenuManager.addToWindow(window, {
 			onCheckRankings: () => this.updateSelectedItems(window),
+			onMatchDetails: () => RankingActions.showMatchDetails(window),
 			onDebugMatch: () => this.debugSelectedItems(window),
 			onSetManual: () => this.setManualRankingDialog(window),
 			onClearManual: () => this.clearManualRankingForSelected(window),

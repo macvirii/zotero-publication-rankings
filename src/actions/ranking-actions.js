@@ -50,6 +50,24 @@ function buildRankingLinePatterns() {
  * Bulk check, debug matching, manual overrides
  */
 var RankingActions = {
+	/** Keyboard-accessible counterpart of the per-badge match tooltip. */
+	showMatchDetails: async function(window) {
+		var pane = window.ZoteroPane;
+		if (!pane) return;
+		var items = pane.getSelectedItems();
+		if (items.length !== 1 || !items[0].isRegularItem()) {
+			await Zotero.alert(window, 'Ranking Match Details', 'Select one publication item to view its ranking match details.');
+			return;
+		}
+		var item = items[0];
+		var rankings = RankingEngine.getRankingArray(item);
+		ColumnManager.setCachedRanking(item.id, rankings);
+		var details = rankings.length ? rankings.map(function(entry) {
+			return UIUtils.formatMatchDetails(entry);
+		}).join('\n\n') : 'No unambiguous match was found in the enabled ranking sources. Check the publication title and ISSN.';
+		await Zotero.alert(window, 'Ranking Match Details', (item.getField('title') || 'Selected item') + '\n\n' + details);
+	},
+
 	/**
 	 * Update rankings for selected items with progress window
 	 * 

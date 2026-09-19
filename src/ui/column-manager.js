@@ -160,7 +160,8 @@ var ColumnManager = {
 				var rank = entry.rank == null ? '' : String(entry.rank).trim();
 				let b = {
 					color: entry.color,
-					text: rank ? label + ': ' + rank : label
+					text: rank ? label + ': ' + rank : label,
+					details: UIUtils.formatMatchDetails(entry)
 				};
 				bItems.push(b);
 			});
@@ -169,8 +170,10 @@ var ColumnManager = {
 			if (!getPref('enableBadges')) {
 				cell.textContent = '';
 				bItems.forEach(function (it, itemIndex) {
-					var { color, text } = it;
+					var { color, text, details } = it;
 					var textSpan = doc.createElement('span');
+					textSpan.title = details;
+					textSpan.setAttribute('aria-label', details);
 					textSpan.style.color = color;
 					textSpan.style.fontWeight = 'bold';
 					textSpan.textContent = text;
@@ -190,10 +193,12 @@ var ColumnManager = {
 				container.style.gap = '5px'; // space between badges
 
 				bItems.forEach(function (it) {
-					var { color, text } = it;
+					var { color, text, details } = it;
 
 					// Create the badge
 					let badge = doc.createElement('span');
+					badge.title = details;
+					badge.setAttribute('aria-label', details);
 					badge.style.position = 'relative';
 
 					// Calculate width based on the length of the text
