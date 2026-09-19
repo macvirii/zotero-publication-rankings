@@ -7,7 +7,7 @@
 **License:** GNU General Public License v3.0 (GPLv3)  
 **Repository:** https://github.com/macvirii/zotero-publication-rankings
 
-Compatibility metadata allows Zotero 7 through 10.0.x, including Zotero 10.0.3. Previous runtime validation was on Zotero 9; Zotero 10.0.3 runtime validation is pending.
+Compatibility metadata allows Zotero 7 through 10.0.x, including Zotero 10.0.3. The maintainer confirmed successful testing of 0.3.7pre1; the stable 0.3.7 release preserves that runtime code and data.
 
 ## Quick Start
 
@@ -25,7 +25,8 @@ The plugin displays enabled ranking sources in a custom **Ranking** column.
 
 ### Journal Sources
 
-- **SJR 2024**: `Q1 18.288`, `Q2 1.423`, `Q3 0.628`, `Q4 0.145`
+- **SJR 2025**: `Q1 18.288`, `Q2 1.423`, `Q3 0.628`, `Q4 0.145`
+- **JCR (bundled local dataset; edition unknown)**: quartiles and Journal Impact Factor values
 - **ABS 2024**: `1`, `2`, `3`, `4`, `4*`
 - **ABDC 2025**: `A*`, `A`, `B`, `C`
 - **Qualis CAPES 2021-2024**: `A1`, `A2`, `A3`, `A4`, `B1`, `B2`, `B3`, `B4`, `C`
@@ -35,11 +36,12 @@ The plugin displays enabled ranking sources in a custom **Ranking** column.
 
 ### Conference Sources
 
-- **CORE 2023 plus historical data**: `A*`, `A`, `B`, `C`, vintage values such as `B [2018]`, Australasian values such as `Au A`, and national values such as `Nat US`
+- **CORE/ICORE through 2026 plus historical data**: `A*`, `A`, `B`, `C`, vintage values such as `B [2018]`, Australasian values such as `Au A`, and national values such as `Nat US`
 
 ## Common Actions
 
 - **Automatic display**: Rankings appear when you view items if auto-update is enabled.
+- **Match details**: Hover a badge or colored text result, or select an item and use **Show Ranking Match Details** in the Tools or context menu.
 - **Manual check**: Select items, then use **Tools → Check Publication Rankings** or the right-click context menu.
 - **Debug matching**: Enable debug mode in preferences, then right-click selected items and choose **Debug Ranking Match**. Check Zotero Debug Output for lines beginning with `[MATCH DEBUG]`.
 - **Manual override**: Right-click selected items and choose **Set Manual Ranking...** or **Clear Manual Ranking**.
@@ -49,7 +51,7 @@ The plugin displays enabled ranking sources in a custom **Ranking** column.
 
 Open **Edit → Settings** or **Zotero → Settings** on macOS, then select **Rankings**.
 
-- Enable or disable CORE, ABS, ABDC, FT50, Qualis CAPES, Nova CAPES, and SPELL.
+- Enable or disable JCR, CORE, ABS, ABDC, FT50, Qualis CAPES, Nova CAPES, and SPELL.
 - SJR is always enabled.
 - Toggle badge display instead of colored text.
 - Toggle automatic ranking updates.
