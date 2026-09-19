@@ -1,47 +1,46 @@
-﻿/**
- * FT50 Database Plugin
- *
- * Financial Times 50 Journal Rankings (FT50) database matching strategies.
- *
- * Data source: ft50Rankings global object from data.js
- */
-
-/* global Zotero, sjrRankings, MatchingUtils, DatabaseRegistry */
+/** Financial Times 50 Journal Rankings membership matcher. */
+/* global ft50Rankings, MatchingUtils, DatabaseRegistry, SJRDatabase, JCRDatabase, ABDCDatabase, QualisCapesDatabase */
 
 var ft50Database = {
-	/**
-	* Main Matching Function
-	* @param {string} title - Publication title to match
-	* @param {Function} debugLog - Debug logging function
-	* @returns {string|null} Ranking string (e.g., "1" or "4*") or N/A if not found
- */
-	match: function (title, debugLog) {
-		debugLog(`[FT50] Retrieving ranking from database...`);
-
-		var result = '';
-		for (var ft50Title of ft50Rankings) {
-			debugLog(`[FT50] Retrieved title: "${ft50Title}"`)
-			if (title.trim().toLowerCase() == ft50Title.trim().toLowerCase()) {
-				debugLog(`[FT50] ✓ Journal Found: "${ft50Title}"`);
-				result = ' '; // We use space to signal that there is no additional ranking
-				break;
+	dataset: null,
+	index: null,
+	buildIndex: function() {
+		if (this.dataset !== ft50Rankings || !this.index) {
+			this.dataset = ft50Rankings;
+			this.index = Object.create(null);
+			for (var i = 0; i < ft50Rankings.length; i++) {
+				var key = String(ft50Rankings[i]).trim().toLowerCase();
+				if (!this.index[key]) this.index[key] = [];
+				this.index[key].push(ft50Rankings[i]);
 			}
 		}
-		
-		if (!result) {
-			debugLog(`[FT50] Journal NOT found: "${title}"`);
+		return this.index;
+	},
+	matchDetailed: function(title, debugLog, item) {
+		debugLog('[FT50] Retrieving ranking from database...');
+		var inputTitle = MatchingUtils.toNfc(title || '').trim();
+		if (!inputTitle) return null;
+		var candidates = this.buildIndex()[inputTitle.toLowerCase()] || [];
+		if (candidates.length !== 1) {
+			if (candidates.length > 1) debugLog('[FT50] Rejected: exact title is ambiguous');
+			return null;
 		}
-		
-		return result;
+		var known = [];
+		if (typeof SJRDatabase !== 'undefined') known.push(SJRDatabase.buildIndex());
+		if (typeof JCRDatabase !== 'undefined') known.push(JCRDatabase.buildIndex());
+		if (typeof ABDCDatabase !== 'undefined') known.push(ABDCDatabase.buildIndex());
+		if (typeof QualisCapesDatabase !== 'undefined') known.push(QualisCapesDatabase.buildIndex());
+		if (MatchingUtils.hasKnownIdentityConflict(title, item, known, debugLog, 'FT50')) return null;
+		return { rank: ' ', match: { method: 'exact-title', matchedTitle: candidates[0], inputTitle: inputTitle } };
+	},
+	match: function(title, debugLog, item) {
+		var detailed = this.matchDetailed(title, debugLog, item);
+		return detailed ? detailed.rank : null;
 	}
-}
+};
 
 DatabaseRegistry.register({
-	id: 'ft50',
-	name: 'FT50 Journal Ranking',
-	prefKey: 'enableFT50',
-	priority: 106,
-	matcher: function (title, debugLog) {
-		return ft50Database.match(title, debugLog);
-	}
-})
+	id: 'ft50', name: 'FT50 Journal Ranking', prefKey: 'enableFT50', priority: 106,
+	matcher: function(title, debugLog, item) { return ft50Database.match(title, debugLog, item); },
+	detailedMatcher: function(title, debugLog, item) { return ft50Database.matchDetailed(title, debugLog, item); }
+});

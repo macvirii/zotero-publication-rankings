@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.7] - 2026-09-19
+- Promoted the successfully tested 0.3.7pre1 build to a stable release and updated the automatic-update feed.
+- Refreshed SJR to the upstream 2025 data while retaining ISSNs, and CORE/ICORE to the newest available editions through 2026.
+- Replaced broad journal/conference heuristics with conservative full-title and identifier matching; ambiguous identities and conflicting identifiers are rejected.
+- Fixed Unicode-equivalent title matching and enabled ISSN-only items.
+- Preserved SJR source records when different journals share a title, including conflicting identifier records.
+- Kept Qualis journal identities separate when names coincide; aggregate evaluation-area grades only within each ISSN.
+- Prevented Nova CAPES from combining incompatible journal identities.
+- Added per-badge and text-result match tooltips, plus a selected-item match-details action showing actual source evidence and dataset editions.
+- Added matching, data-generation, display and cache-invalidation regression tests.
+
 ## [0.3.6] - 2026-09-18
 - Updated plugin and automatic-update compatibility metadata to allow Zotero 10.0.x, including Zotero 10.0.3.
 - Updated both build scripts to package version 0.3.6.

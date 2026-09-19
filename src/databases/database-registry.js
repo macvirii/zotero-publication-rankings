@@ -10,6 +10,7 @@
  * - prefKey: Preference key (null = always enabled)
  * - priority: Lower numbers checked first (0 = highest priority)
  * - matcher: Function(title, debugLog, item) that returns ranking or null
+ * - detailedMatcher: Optional function returning {rank, match} or null
  */
 
 var DatabaseRegistry = {
@@ -46,7 +47,8 @@ var DatabaseRegistry = {
 			name: config.name,
 			prefKey: config.prefKey || null,
 			priority: priority,
-			matcher: config.matcher
+			matcher: config.matcher,
+			detailedMatcher: typeof config.detailedMatcher === 'function' ? config.detailedMatcher : null
 		});
 
 		Zotero.debug(`Publication Rankings: Registered database '${config.name}' (priority ${priority})`);

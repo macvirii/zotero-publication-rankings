@@ -1,93 +1,30 @@
-/**
- * ABDC Database Plugin
- *
- * Australian Business Deans Council Journal Quality List matching.
- * Data source: abdcRankings global object from data.js
- */
-
+/** Australian Business Deans Council identity-safe matcher. */
 /* global MatchingUtils, DatabaseRegistry, abdcRankings */
 
 var ABDCDatabase = {
-	normalizedTitleIndex: null,
-
+	dataset: null,
+	index: null,
 	buildIndex: function() {
-		if (this.normalizedTitleIndex) {
-			return;
+		if (this.dataset !== abdcRankings || !this.index) {
+			this.dataset = abdcRankings;
+			this.index = MatchingUtils.buildStructuredIndex(abdcRankings);
 		}
-
-		this.normalizedTitleIndex = Object.create(null);
-		var byTitle = abdcRankings.byTitle || {};
-		for (var title in byTitle) {
-			var normalized = MatchingUtils.normalizeString(title);
-			if (!this.normalizedTitleIndex[normalized]) {
-				this.normalizedTitleIndex[normalized] = byTitle[title];
-			}
-		}
+		return this.index;
 	},
-
-	normalizeIssn: function(value) {
-		var cleaned = (value || '').replace(/[^0-9Xx]/g, '').toUpperCase();
-		return cleaned.length === 8 ? cleaned : '';
-	},
-
-	extractIssns: function(item) {
-		if (!item || !item.getField) {
-			return [];
-		}
-
-		var issnField = item.getField('ISSN') || '';
-		var matches = issnField.match(/[0-9Xx]{4}[- ]?[0-9Xx]{4}/g) || [];
-		var issns = [];
-		for (var i = 0; i < matches.length; i++) {
-			var issn = this.normalizeIssn(matches[i]);
-			if (issn && issns.indexOf(issn) === -1) {
-				issns.push(issn);
-			}
-		}
-		return issns;
-	},
-
-	findByTitle: function(title) {
-		this.buildIndex();
-		var byTitle = abdcRankings.byTitle || {};
-		var exact = title.trim().toLowerCase();
-		if (byTitle[exact]) {
-			return byTitle[exact];
-		}
-
-		var normalized = MatchingUtils.normalizeString(title);
-		return this.normalizedTitleIndex[normalized] || null;
-	},
-
-	match: function(title, debugLog, item) {
+	matchDetailed: function(title, debugLog, item) {
 		debugLog('[ABDC] Retrieving ranking from database...');
-
-		var byIssn = abdcRankings.byIssn || {};
-		var issns = this.extractIssns(item);
-		for (var i = 0; i < issns.length; i++) {
-			if (byIssn[issns[i]]) {
-				debugLog('[ABDC] ✓ ISSN match: ' + issns[i] + ' -> ' + byIssn[issns[i]].abdc);
-				return byIssn[issns[i]].abdc;
-			}
-		}
-
-		var entry = this.findByTitle(title);
-		if (entry) {
-			debugLog('[ABDC] ✓ Title match -> ' + entry.abdc);
-			return entry.abdc;
-		}
-
-		debugLog('[ABDC] Journal NOT found: "' + title + '"');
-		return null;
+		var resolved = MatchingUtils.resolveIdentity(this.buildIndex(), title, item, debugLog, 'ABDC');
+		var rank = resolved && resolved.entry.abdc;
+		return rank ? { rank: rank, match: resolved.match } : null;
+	},
+	match: function(title, debugLog, item) {
+		var detailed = this.matchDetailed(title, debugLog, item);
+		return detailed ? detailed.rank : null;
 	}
 };
 
 DatabaseRegistry.register({
-	id: 'abdc',
-	name: 'ABDC Journal Quality List',
-	prefKey: 'enableABDC',
-	priority: 102,
-	matcher: function(title, debugLog, item) {
-		return ABDCDatabase.match(title, debugLog, item);
-	}
+	id: 'abdc', name: 'ABDC Journal Quality List', prefKey: 'enableABDC', priority: 102,
+	matcher: function(title, debugLog, item) { return ABDCDatabase.match(title, debugLog, item); },
+	detailedMatcher: function(title, debugLog, item) { return ABDCDatabase.matchDetailed(title, debugLog, item); }
 });

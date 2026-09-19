@@ -8,7 +8,7 @@
 # XPI files are just ZIP files with a different extension
 
 pluginName="publication-rankings"
-version="0.3.6"
+version="0.3.7"
 distDir="dist"
 outputFile="${distDir}/${pluginName}-${version}.xpi"
 

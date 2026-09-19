@@ -1,47 +1,19 @@
-/**
- * CORE Database Plugin
- * 
- * CORE Conference Rankings database matching.
- * Delegates to MatchingUtils for conference-specific matching strategies.
- * 
- * Data source: coreRankings global object from data.js
- * Preference: enableCORE (can be disabled by user)
- */
-
-/* global Zotero, MatchingUtils, DatabaseRegistry */
+/** CORE Conference Rankings conservative matcher. */
+/* global MatchingUtils, DatabaseRegistry */
 
 var COREDatabase = {
-	/**
-	 * Main matching function - delegates to MatchingUtils
-	 * 
-	 * @param {string} title - Conference title to match
-	 * @param {Function} debugLog - Debug logging function
-	 * @returns {string|null} Ranking string (e.g., "A*", "A", "B", "C") or null if not found
-	 */
+	matchDetailed: function(title, debugLog) {
+		debugLog('[CORE] Retrieving ranking from database...');
+		return MatchingUtils.matchCoreConferenceDetailed(title, debugLog);
+	},
 	match: function(title, debugLog) {
-		debugLog(`[CORE] Trying CORE database...`);
-		
-		// Delegate to MatchingUtils which has specialized conference matching logic
-		var result = MatchingUtils.matchCoreConference(title, debugLog);
-		
-		if (result) {
-			debugLog(`[CORE] ✓ MATCH: ${result}`);
-		} else {
-			debugLog(`[CORE] No match found`);
-		}
-		
-		return result;
+		var detailed = this.matchDetailed(title, debugLog);
+		return detailed ? detailed.rank : null;
 	}
 };
 
-// Register CORE database with the registry
-// Optional (prefKey = 'enableCORE'), lower priority than SJR (100)
 DatabaseRegistry.register({
-	id: 'core',
-	name: 'CORE Conference Rankings',
-	prefKey: 'enableCORE',  // Can be disabled in preferences
-	priority: 100,          // Checked after SJR
-	matcher: function(title, debugLog) {
-		return COREDatabase.match(title, debugLog);
-	}
+	id: 'core', name: 'CORE Conference Rankings', prefKey: 'enableCORE', priority: 100,
+	matcher: function(title, debugLog, item) { return COREDatabase.match(title, debugLog, item); },
+	detailedMatcher: function(title, debugLog, item) { return COREDatabase.matchDetailed(title, debugLog, item); }
 });

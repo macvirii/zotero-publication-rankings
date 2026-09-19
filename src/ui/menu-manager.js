@@ -78,11 +78,13 @@ var MenuManager = {
 		
 		// Remove Tools menu items
 		this.removeElement(doc, 'zotero-rankings-update');
+		this.removeElement(doc, 'zotero-rankings-match-details');
 		this.removeElement(doc, 'zotero-rankings-write-extra');
 		this.removeElement(doc, 'zotero-rankings-separator');
 		
 		// Remove context menu items
 		this.removeElement(doc, 'zotero-rankings-context-update');
+		this.removeElement(doc, 'zotero-rankings-context-match-details');
 		this.removeElement(doc, 'zotero-rankings-context-debug');
 		this.removeElement(doc, 'zotero-rankings-context-manual');
 		this.removeElement(doc, 'zotero-rankings-context-clear');
@@ -105,6 +107,7 @@ var MenuManager = {
 		}
 
 		this.removeElement(doc, 'zotero-rankings-update');
+		this.removeElement(doc, 'zotero-rankings-match-details');
 		this.removeElement(doc, 'zotero-rankings-write-extra');
 		this.removeElement(doc, 'zotero-rankings-separator');
 		
@@ -119,6 +122,8 @@ var MenuManager = {
 		menuItem.setAttribute('label', 'Check Publication Rankings');
 		menuItem.addEventListener('command', handlers.onCheckRankings);
 		toolsMenu.appendChild(menuItem);
+		toolsMenu.appendChild(this.createMenuItem(doc, 'zotero-rankings-match-details',
+			'Show Ranking Match Details', handlers.onMatchDetails));
 		
 		// Create "Write Rankings to Extra Field" menu item
 		var writeExtraItem = doc.createXULElement('menuitem');
@@ -145,6 +150,7 @@ var MenuManager = {
 		}
 
 		this.removeElement(doc, 'zotero-rankings-context-update');
+		this.removeElement(doc, 'zotero-rankings-context-match-details');
 		this.removeElement(doc, 'zotero-rankings-context-debug');
 		this.removeElement(doc, 'zotero-rankings-context-manual');
 		this.removeElement(doc, 'zotero-rankings-context-clear');
@@ -158,6 +164,12 @@ var MenuManager = {
 		
 		// Define menu items to add (modular structure for easy additions)
 		var menuItems = [
+			{
+				id: 'zotero-rankings-context-match-details',
+				label: 'Show Ranking Match Details',
+				handler: handlers.onMatchDetails,
+				condition: () => true
+			},
 			{
 				id: 'zotero-rankings-context-update',
 				label: 'Check Publication Rankings',

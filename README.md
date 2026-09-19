@@ -29,12 +29,12 @@ Parts of this fork were migrated, refactored, and documented with AI assistance.
 ## Features
 
 - **Custom "Ranking" Column**: See rankings at a glance without modifying your metadata
-- **SJR Journal Rankings**: 30,818+ journals with quartiles (Q1-Q4) and SJR scores
+- **SJR Journal Rankings**: 31,753+ journal titles (same-name source records are kept separate) with quartiles (Q1-Q4) and SJR scores
 - **JCR Rankings**: Journal Citation Reports quartiles and Journal Impact Factor values
-- **CORE Conference Rankings**: 2,173+ conferences (A*, A, B, C) with historical editions
+- **CORE Conference Rankings**: 2,210+ conferences (A*, A, B, C) from the newest available CORE/ICORE editions
 - **ABS Rankings**: 1,822 journals
 - **ABDC Rankings**: 2,651 journals from the Australian Business Deans Council Journal Quality List
-- **Qualis CAPES 2021-2024**: 32,195+ journal titles from the official CAPES spreadsheet, using the best stratum across areas
+- **Qualis CAPES 2021-2024**: 32,195+ journal titles from the official CAPES spreadsheet, using the best stratum across areas for each ISSN; shared titles remain separate candidates
 - **Nova Classificacao CAPES**: Local rule-based Area 27 classification (MB, B, R, F, I) using ABDC, ABS, JCR, SJR, SPELL, and SciELO data when provided
 - **SPELL Impact Rankings**: 111 Brazilian journals grouped by impact percentile band
 - **FT50 Rankings**: 50 journals
@@ -44,10 +44,11 @@ Parts of this fork were migrated, refactored, and documented with AI assistance.
 - **Badge Display**: 
 <img src="assets/Rankings_Badges.png" style="width: 300px; display: block; margin: 0 auto;">
 
-- **Smart Matching**: Exact, ISSN, normalized-title, fuzzy, word-overlap, substring, and acronym strategies handle title variations across databases
+- **Conservative Matching**: Exact ISSNs and full publication titles resolve unique identities. Unicode normalization handles accents consistently; ambiguous or conflicting identities do not receive automatic rankings.
 - **Automatic Updates**: Rankings appear when items are added or viewed
 - **Sortable Column**: Click column header to sort by ranking tier (A* → Q4)
 - **Context Menu Integration**: Right-click items for quick ranking operations
+- **Match Details**: Hover over each badge or colored text result to see its matched publication, method, identifier and dataset edition. The Tools/context-menu action "Show Ranking Match Details" provides the same information for a selected item.
 - **Debug Matching**: Detailed logging to troubleshoot matching issues
 - **Manual Override**: Set custom rankings for incorrectly matched journals
 - **Persistent Storage**: Manual overrides and preferences survive Zotero restarts
@@ -80,7 +81,7 @@ If rankings aren't appearing correctly:
 2. Right-click → "Debug Ranking Match"
 3. Open Help → Debug Output Logging → View Output
 4. Look for lines starting with `[MATCH DEBUG]` showing:
-   - Matching strategies attempted (exact, fuzzy, word overlap, CORE)
+   - Matching methods and rejected ambiguous or conflicting candidates
    - Match percentages and which database was used
    - Final ranking result or why no match was found
 
@@ -125,9 +126,9 @@ The sort order groups stronger rankings first across enabled sources, including 
 Access via Edit → Preferences (Zotero → Settings on Mac), then select "Rankings":
 
 ### Ranking Databases
-- **SJR (SCImago Journal Rankings)**: Always enabled - 30,818+ journals
+- **SJR (SCImago Journal Rankings)**: Always enabled - 31,753+ journals
 - **JCR (Journal Citation Reports)**: Toggleable - local dataset only, when supplied
-- **CORE (Computing Research & Education)**: Toggleable - 2,173+ conferences
+- **CORE (Computing Research & Education)**: Toggleable - 2,210+ conferences
 - **ABS Rankings***: Toggleable - 1,822 journals
 - **ABDC Rankings***: Toggleable - 2,651 journals
 - **Qualis CAPES 2021-2024***: Toggleable - 32,195+ journal titles
@@ -189,7 +190,18 @@ python extract_ft_50.py source-data/FT50_FullList.csv
 python generate_data_js.py
 ```
 
-This generates `src/data/data.js` from the JSON files in `update-scripts/`.
+This generates `src/data/data.js` from the JSON files in `update-scripts/`. See [dataset provenance](update-scripts/SOURCES.md) for editions and upstream snapshot details. The local JCR dataset is retained when refreshing unrelated sources.
+
+### Validating a Build
+
+```bash
+node --test tests/*.test.cjs
+python3 -m unittest discover -s update-scripts/tests -p 'test_*.py'
+bash -n build.sh
+python3 -m compileall -q update-scripts
+```
+
+Version `0.3.7` promotes the successfully tested `0.3.7pre1` build to a stable release. Install the XPI from `dist/` through Zotero's Add-ons manager, then follow [the test checklist](TESTING.md). Building locally does not publish a release.
 
 ### Building the Plugin
 
@@ -203,7 +215,7 @@ cd zotero-publication-rankings
 ./build.sh
 ```
 
-This creates the `.xpi` file ready for installation (e.g., `dist/publication-rankings-0.3.6.xpi`).
+This creates the `.xpi` file ready for installation (e.g., `dist/publication-rankings-0.3.7.xpi`).
 
 ## Project Structure
 
@@ -263,9 +275,9 @@ The plugin uses an extensible modular architecture designed for maintainability 
 
 #### Data Layer
 - **`data.js`** - Ranking databases
-  - `sjrRankings`: 30,818 journals with quartiles (Q1-Q4) and SJR scores
+  - `sjrRankings`: 31,753 title keys covering 31,765 source records with quartiles (Q1-Q4), SJR scores and identifiers
   - `jcrRankings`: optional local JCR journal quartiles and Journal Impact Factor values
-  - `coreRankings`: 2,173 conferences with tiers (A*, A, B, C) and historical editions
+  - `coreRankings`: 2,210 conferences with tiers (A*, A, B, C) and historical editions
   - `absRankings`: 1,822 journals with ranking (1, 2, 3, 4, 4*)
   - `abdcRankings`: 2,651 journals with ABDC quality ratings (A*, A, B, C)
   - `qualisCapes2021Rankings`: official Qualis CAPES 2021-2024 strata
@@ -275,15 +287,15 @@ The plugin uses an extensible modular architecture designed for maintainability 
 
 #### Database Registry System
 - **`database-registry.js`** - Central registry for all ranking databases
-  - Uniform plugin API: `register({ id, name, prefKey, priority, matcher })`
+  - Uniform plugin API: `register({ id, name, prefKey, priority, matcher, detailedMatcher })`
   - Priority-based ordering across all enabled ranking sources
   - Generic enable/disable support for all databases
 - **`database-sjr.js`** - SJR matching strategies
-  - ISSN, exact, fuzzy, and word-overlap matching for journal titles
+  - Identifier and full-title matching with ambiguity and conflict rejection
 - **`database-jcr.js`** - JCR journal matching
   - ISSN and normalized-title matching against a locally generated JCR dataset
 - **`database-core.js`** - CORE conference matching
-  - 5-strategy matching: exact → substring → word overlap → acronym → year-flexible
+  - Full-title matching, deterministic proceedings/year cleanup and unique acronym lookup; generic substring/word-overlap guesses are rejected
   - Delegates to `MatchingUtils` for algorithm implementation
 
 #### Ranking Engine
@@ -322,18 +334,20 @@ The plugin uses an extensible modular architecture designed for maintainability 
 
 #### Extensibility
 Adding new ranking databases requires minimal core logic changes:
-1. Create `src/databases/database-xxx.js` with a matcher that accepts the normalized title, debug logger, and Zotero item when needed
-2. Register with `DatabaseRegistry.register({ id, matcher, ... })`
+1. Create `src/databases/database-xxx.js` with a matcher that accepts the trimmed publication title, debug logger, and Zotero item. Use the shared identity resolver for identifier-backed sources.
+2. Register with `DatabaseRegistry.register({ id, matcher, detailedMatcher, ... })`. The legacy `matcher` returns a rank string or `null`; `detailedMatcher` returns `{ rank, match: { method, matchedTitle, matchedIssn?, inputTitle?, evidence?, sources? } }` or `null`. Capture the evidence when matching so the hover uses the same decision. Legacy modules remain supported but display “Match details unavailable.”
 3. Add preference in `preferences.xhtml`
 4. The generic `handleDatabaseChange()` automatically supports the new database
+
+Dataset editions come from `rankingDatasetMetadata` in the generated bundle. Sources without a verified edition explicitly display it as unknown.
 
 The build scripts copy these source modules into the XPI root in the order required by `bootstrap.js`.
 
 ## Data Sources
 
-- **SJR 2024**: [SCImago Journal & Country Rank](https://www.scimagojr.com/)
+- **SJR 2025**: [SCImago Journal & Country Rank](https://www.scimagojr.com/)
 - **JCR**: [Journal Citation Reports](https://jcr.clarivate.com/) exports are supported through `extract_jcr.py`
-- **CORE 2023**: [Computing Research and Education](http://portal.core.edu.au/conf-ranks/)
+- **CORE/ICORE (through 2026)**: [Computing Research and Education](http://portal.core.edu.au/conf-ranks/)
 - **ABS 2024**: [ABS Ranking](https://journalranking.org)
 - **ABDC 2025**: [ABDC Journal Quality List](https://abdc.edu.au/abdc-journal-quality-list/)
 - **Qualis CAPES 2021-2024**: Official CAPES XLSX spreadsheet included in this fork's source tree

@@ -1,218 +1,118 @@
 /*
  * Publication Rankings Plugin for Zotero 7
  * Ranking matching engine - Pure logic with no UI dependencies
- * 
+ *
  * Copyright (C) 2025 Ben Stephens
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* global Zotero, DatabaseRegistry, ManualOverrides, UIUtils */
+/* global Zotero, DatabaseRegistry, ManualOverrides, UIUtils, MatchingUtils, rankingDatasetMetadata */
 
-/**
- * Ranking matching engine - handles all ranking lookup logic
- * Pure business logic with no UI dependencies for easy testing
- * 
- * Delegates actual matching to registered database plugins via DatabaseRegistry
- */
 var RankingEngine = {
-	/**
-	 * Get the ranking for a Zotero item
-	 * 
-	 * @param {Object} item - Zotero item object
-	 * @param {boolean} enableDebug - Whether to log detailed matching information
-	 * @returns {string} Ranking string (e.g., "Q1 0.85", "A*", "B") or empty string if not found
-	 * 
-	 * @example
-	 * var ranking = RankingEngine.getRanking(item, false);
-	 * // Returns: "Q1 0.85" or "A*" or ""
-	 */
-	getRanking: function(item, enableDebug = false) {
-		try {
-			if (!item || !item.isRegularItem()) {
-				return '';
-			}
-			
-			// Extract publication title from various possible fields
-			var publicationTitle = this.extractPublicationTitle(item);
-			if (!publicationTitle) {
-				return '';
-			}
-			
-			var normalizedTitle = publicationTitle.trim();
-			
-			// Debug logging helper
-			const debugLog = (message) => {
-				if (enableDebug) {
-					Zotero.debug(`[MATCH DEBUG] ${message}`);
-				}
-			};
-			
-			debugLog(`=== Matching: "${publicationTitle}" ===`);
-			
-			// Check manual overrides first (highest priority)
-			const manualOverride = ManualOverrides.get(publicationTitle);
-			if (manualOverride) {
-				debugLog(`✓ MANUAL OVERRIDE: "${manualOverride}"`);
-				return manualOverride;
-			}
-			debugLog(`No manual override found`);
-			
-			// Get all enabled databases from registry (sorted by priority)
-			const databases = DatabaseRegistry.getEnabledDatabases();
-			debugLog(`Checking ${databases.length} enabled database(s): ${databases.map(db => db.name).join(', ')}`);
-			
-			// Try each database in priority order
-			var ranking = '';
-			for (var i = 0; i < databases.length; i++) {
-				var db = databases[i];
-				debugLog(`Trying database: ${db.name} (priority ${db.priority})`);
-				
-				var rank = db.matcher(normalizedTitle, debugLog, item);
-				debugLog(`Matcher in ${db.name} return rank: ${rank}`);
-				if (rank) {
-					debugLog(`✓ FOUND in ${db.name}: ${rank}`);
-					var label = UIUtils.getDatabaseLabel(db.id);
-					var entry = rank.trim() ? label + ': ' + rank : label;
-					ranking = ranking ? ranking + ' ' + entry : entry;
-					debugLog(`Ranking = ${ranking}`);
-				}
-			}
-
-			if (!ranking) {
-				debugLog(`✗ NO MATCH FOUND in any database for "${publicationTitle}"`);
-			}
-			return ranking;
-		}
-		catch (e) {
-			Zotero.logError("RankingEngine: Error getting ranking: " + e);
-			return '';
-		}
+	getDatasetMetadata: function(id) {
+		if (typeof rankingDatasetMetadata === 'undefined' || !rankingDatasetMetadata) return null;
+		var metadata = rankingDatasetMetadata[id];
+		if (!metadata || typeof metadata.label !== 'string' || !metadata.label.trim() ||
+			typeof metadata.edition !== 'string' || !metadata.edition.trim()) return null;
+		var verified = { label: metadata.label, edition: metadata.edition };
+		if (typeof metadata.source === 'string' && metadata.source.trim()) verified.source = metadata.source;
+		return verified;
 	},
 
-	/**
-	 * Get the rankings of a Zotero item as structured objects
-	 *		
-	 * @param {Object} item - Zotero item object
-	 * @param {boolean} enableDebug - Whether to log detailed matching information
-	 * @returns {Array} Array of {id, rank, color} objects or an empty array
-	 * 
-	 * @example
-	 * var ranking = RankingEngine.getRankingArray(item, false);
-	 * // Returns: [{id: "sjr", rank: "Q1 0.85", color: "#2E7D32"}] or []
-	 */
-	getRankingArray: function (item, enableDebug = false) {
+	attachMetadata: function(id, match) {
+		if (!match) return match;
+		var metadata = this.getDatasetMetadata(id);
+		if (metadata) match.dataset = metadata;
+		if (Array.isArray(match.sources)) {
+			for (var i = 0; i < match.sources.length; i++) {
+				var source = match.sources[i];
+				if (source && source.match) this.attachMetadata(source.id, source.match);
+			}
+		}
+		return match;
+	},
+
+	getRanking: function(item, enableDebug) {
+		var resolved = this.getRankingArray(item, enableDebug);
+		if (resolved.length === 1 && resolved[0].id === 'Manual') return resolved[0].rank;
+		var values = [];
+		for (var i = 0; i < resolved.length; i++) {
+			var entry = resolved[i];
+			var label = UIUtils.getDatabaseLabel(entry.id);
+			values.push(entry.rank.trim() ? label + ': ' + entry.rank : label);
+		}
+		return values.join(' ');
+	},
+
+	getRankingArray: function(item, enableDebug) {
 		try {
-			var m = [];
-
-			if (!item || !item.isRegularItem()) {
-				return m;
-			}
-
-			// Extract publication title from various possible fields
-			var publicationTitle = this.extractPublicationTitle(item);
-
-			if (!publicationTitle) {
-				return m;
-			}
-
-			var normalizedTitle = publicationTitle.trim();
-
-			// Debug logging helper
-			const debugLog = (message) => {
-				if (enableDebug) {
-					Zotero.debug(`[MATCH DEBUG getRankingArray] ${message}`);
-				}
+			var matches = [];
+			if (!item || !item.isRegularItem()) return matches;
+			var publicationTitle = this.extractPublicationTitle(item) || '';
+			var title = publicationTitle.trim();
+			var inputIssns = MatchingUtils.extractIssns(item);
+			if (!title && !inputIssns.length) return matches;
+			var debugLog = function(message) {
+				if (enableDebug) Zotero.debug('[MATCH DEBUG] ' + message);
 			};
 
-			debugLog(`=== Matching: "${publicationTitle}" ===`);
-
-			// Check manual overrides first (highest priority)
-			const manualOverride = ManualOverrides.get(publicationTitle);
-			if (manualOverride) {
-				debugLog(`✓ MANUAL OVERRIDE: "${manualOverride}"`);
-				m.push({ id: 'Manual', rank: manualOverride, color: '#757575' });
-				return m;
-			}
-			debugLog(`No manual override found`);
-
-			// Get all enabled databases from registry (sorted by priority)
-			const databases = DatabaseRegistry.getEnabledDatabases();
-			debugLog(`Checking ${databases.length} enabled database(s): ${databases.map(db => db.name).join(', ')}`);
-
-			// Try each database in priority order
-			for (var i = 0; i < databases.length; i++) {
-				var db = databases[i];
-				debugLog(`Trying database: ${db.name} (priority ${db.priority})`);
-
-				var rank = db.matcher(normalizedTitle, debugLog, item);
-				if (rank) {
-					debugLog(`✓ FOUND in ${db.name}: ${rank}`);
-					m.push({
-						id: db.id,
-						rank: rank,
-						color: UIUtils.getRankingColor(db.id, rank)
+			if (title) {
+				var manualOverride = ManualOverrides.get(publicationTitle);
+				if (manualOverride) {
+					matches.push({
+						id: 'Manual', rank: manualOverride, color: '#757575',
+						match: { method: 'manual-override', matchedTitle: publicationTitle, inputTitle: publicationTitle }
 					});
+					return matches;
 				}
 			}
 
-			if (m.length === 0) {
-				debugLog(`✗ NO MATCH FOUND in any database for "${publicationTitle}"`);
+			var databases = DatabaseRegistry.getEnabledDatabases();
+			for (var i = 0; i < databases.length; i++) {
+				var db = databases[i];
+				var detailed = db.detailedMatcher ? db.detailedMatcher(title, debugLog, item) : null;
+				if (!db.detailedMatcher) {
+					var legacyRank = db.matcher(title, debugLog, item);
+					if (legacyRank) detailed = {
+						rank: legacyRank,
+						match: null
+					};
+				}
+				if (!detailed || detailed.rank === null || typeof detailed.rank === 'undefined') continue;
+				this.attachMetadata(db.id, detailed.match);
+				matches.push({
+					id: db.id,
+					rank: detailed.rank,
+					color: UIUtils.getRankingColor(db.id, detailed.rank),
+					match: detailed.match
+				});
 			}
-
-			return m;
-		}
-		catch (e) {
-			Zotero.logError("RankingEngine: Error getting ranking: " + e);
+			return matches;
+		} catch (error) {
+			Zotero.logError('RankingEngine: Error getting ranking: ' + error);
 			return [];
 		}
 	},
 
-
-	/**
-	 * Extract publication title from item, checking multiple possible fields
-	 * 
-	 * @param {Object} item - Zotero item object
-	 * @returns {string|null} Publication title or null if not found
-	 * 
-	 * @example
-	 * var title = RankingEngine.extractPublicationTitle(item);
-	 * // Returns: "Nature" or "Proceedings of ACM CCS" or null
-	 */
 	extractPublicationTitle: function(item) {
-		if (!item || !item.isRegularItem()) {
-			return null;
+		if (!item || !item.isRegularItem()) return null;
+		var fields = ['publicationTitle', 'proceedingsTitle', 'conferenceName'];
+		for (var i = 0; i < fields.length; i++) {
+			var value = item.getField(fields[i]);
+			if (value && value.trim()) return value;
 		}
-		
-		// Try multiple fields in priority order
-		var publicationTitle = item.getField('publicationTitle');
-		if (publicationTitle) {
-			return publicationTitle;
-		}
-		
-		// For conference papers, try proceedings title
-		publicationTitle = item.getField('proceedingsTitle');
-		if (publicationTitle) {
-			return publicationTitle;
-		}
-		
-		// Also try conference name field
-		publicationTitle = item.getField('conferenceName');
-		if (publicationTitle) {
-			return publicationTitle;
-		}
-		
 		return null;
 	}
 };

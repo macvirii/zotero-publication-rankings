@@ -1,78 +1,39 @@
-/**
- * SPELL Database Plugin
- *
- * SPELL impact percentile matching.
- * Data source: spellRankings global object from data.js
- */
-
-/* global MatchingUtils, DatabaseRegistry, spellRankings */
+/** SPELL impact percentile conservative matcher. */
+/* global MatchingUtils, DatabaseRegistry, spellRankings, SJRDatabase, JCRDatabase, ABDCDatabase, QualisCapesDatabase */
 
 var SPELLDatabase = {
-	normalizedTitleIndex: null,
-
+	dataset: null,
+	index: null,
 	buildIndex: function() {
-		if (this.normalizedTitleIndex) {
-			return;
+		if (this.dataset !== spellRankings || !this.index) {
+			this.dataset = spellRankings;
+			this.index = MatchingUtils.buildStructuredIndex(spellRankings);
 		}
-
-		this.normalizedTitleIndex = Object.create(null);
-		var byTitle = spellRankings.byTitle || {};
-		for (var title in byTitle) {
-			var normalized = MatchingUtils.normalizeString(title);
-			if (!this.normalizedTitleIndex[normalized]) {
-				this.normalizedTitleIndex[normalized] = byTitle[title];
-			}
-		}
+		return this.index;
 	},
-
-	displayClass: function(spellClass) {
-		switch (spellClass) {
-			case 'top10':
-				return 'Top 10%';
-			case 'next30':
-				return '10-40%';
-			case 'next30_2':
-				return '40-70%';
-			case 'bottom30':
-				return '70-100%';
-			default:
-				return spellClass;
-		}
+	displayClass: function(value) {
+		return { top10: 'Top 10%', next30: '10-40%', next30_2: '40-70%', bottom30: '70-100%' }[value] || value;
 	},
-
-	findByTitle: function(title) {
-		this.buildIndex();
-		var byTitle = spellRankings.byTitle || {};
-		var exact = title.trim().toLowerCase();
-		if (byTitle[exact]) {
-			return byTitle[exact];
-		}
-
-		var normalized = MatchingUtils.normalizeString(title);
-		return this.normalizedTitleIndex[normalized] || null;
-	},
-
-	match: function(title, debugLog) {
+	matchDetailed: function(title, debugLog, item) {
 		debugLog('[SPELL] Retrieving ranking from database...');
-
-		var entry = this.findByTitle(title);
-		if (entry) {
-			var result = this.displayClass(entry.spell);
-			debugLog('[SPELL] ✓ Title match -> ' + result);
-			return result;
-		}
-
-		debugLog('[SPELL] Journal NOT found: "' + title + '"');
-		return null;
+		var resolved = MatchingUtils.resolveIdentity(this.buildIndex(), title, item, debugLog, 'SPELL');
+		if (!resolved || !resolved.entry.spell) return null;
+		var known = [];
+		if (typeof SJRDatabase !== 'undefined') known.push(SJRDatabase.buildIndex());
+		if (typeof JCRDatabase !== 'undefined') known.push(JCRDatabase.buildIndex());
+		if (typeof ABDCDatabase !== 'undefined') known.push(ABDCDatabase.buildIndex());
+		if (typeof QualisCapesDatabase !== 'undefined') known.push(QualisCapesDatabase.buildIndex());
+		if (MatchingUtils.hasKnownIdentityConflict(title, item, known, debugLog, 'SPELL')) return null;
+		return { rank: this.displayClass(resolved.entry.spell), match: resolved.match };
+	},
+	match: function(title, debugLog, item) {
+		var detailed = this.matchDetailed(title, debugLog, item);
+		return detailed ? detailed.rank : null;
 	}
 };
 
 DatabaseRegistry.register({
-	id: 'spell',
-	name: 'SPELL Impact Ranking',
-	prefKey: 'enableSPELL',
-	priority: 105,
-	matcher: function(title, debugLog) {
-		return SPELLDatabase.match(title, debugLog);
-	}
+	id: 'spell', name: 'SPELL Impact Ranking', prefKey: 'enableSPELL', priority: 105,
+	matcher: function(title, debugLog, item) { return SPELLDatabase.match(title, debugLog, item); },
+	detailedMatcher: function(title, debugLog, item) { return SPELLDatabase.matchDetailed(title, debugLog, item); }
 });

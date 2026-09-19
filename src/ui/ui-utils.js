@@ -9,6 +9,81 @@
 var UIUtils = {
 	badgeColorCache: {},
 
+	/** Format captured match evidence for tooltips and the selected-item dialog. */
+	formatMatchDetails: function(entry) {
+		var clean = function(value) { return String(value == null ? '' : value).replace(/[\r\n\t]+/g, ' ').trim(); };
+		var label = this.getDatabaseLabel(entry.id);
+		var rank = clean(entry.rank);
+		var lines = [rank ? label + ': ' + rank : label];
+		var match = entry.match;
+		if (!match) {
+			return lines.concat('Match details unavailable.').join('\n');
+		}
+
+		if (match.matchedTitle) lines.push('Matched publication: ' + clean(match.matchedTitle));
+		if (match.inputTitle && clean(match.inputTitle).toLowerCase() !== clean(match.matchedTitle).toLowerCase()) {
+			lines.push('Item publication: ' + clean(match.inputTitle));
+		}
+		lines.push('Match: ' + this.getMatchMethodLabel(match));
+
+		if (match.method === 'manual-override') {
+			lines.push('Applies to items with this publication title.');
+			return lines.join('\n');
+		}
+
+		var dataset = match.dataset;
+		if (dataset) {
+			var edition = clean(dataset.edition);
+			lines.push('Dataset: ' + clean(dataset.label || label) +
+				(edition && edition !== 'unknown' ? ' — ' + edition : ' — edition unknown'));
+		} else {
+			lines.push('Dataset: ' + label + ' — edition unknown');
+		}
+
+		if (entry.id === 'qualisCapes') lines.push('Best stratum across evaluation areas for this identity.');
+		if (match.method === 'source-aggregation') {
+			var evidence = match.evidence || {};
+			if (evidence.winningRule) lines.push('Rule: ' + clean(evidence.winningRule));
+			if (evidence.baseGrade) lines.push('Grade before SciELO adjustment: ' + clean(evidence.baseGrade));
+			if (evidence.scieloAdjustment && evidence.scieloAdjustment.from && evidence.scieloAdjustment.to) {
+				lines.push('SciELO adjustment: applied (' + clean(evidence.scieloAdjustment.from) +
+					' → ' + clean(evidence.scieloAdjustment.to) + ')');
+			} else {
+				lines.push('SciELO adjustment: not applied');
+			}
+			var self = this;
+			(match.sources || []).forEach(function(source) {
+				var sourceMatch = source.match || {};
+				var sourceLabel = self.getDatabaseLabel(source.id);
+				var description = sourceLabel + (clean(source.rank) ? ': ' + clean(source.rank) : '');
+				if (sourceMatch.matchedTitle) description += ' — ' + clean(sourceMatch.matchedTitle);
+				description += ' (' + self.getMatchMethodLabel(sourceMatch);
+				var sourceEdition = sourceMatch.dataset && clean(sourceMatch.dataset.edition);
+				description += '; ' + (sourceEdition && sourceEdition !== 'unknown' ? sourceEdition : 'edition unknown') + ')';
+				lines.push(description);
+			});
+		}
+		return lines.join('\n');
+	},
+
+	getMatchMethodLabel: function(match) {
+		var labels = {
+			'issn': 'Exact ISSN',
+			'exact-title': 'Exact title',
+			'normalized-title': 'Normalized full title',
+			'conference-title': 'Full conference title after proceedings/edition cleanup',
+			'acronym': 'Unique conference acronym',
+			'manual-override': 'Manual override',
+			'source-aggregation': 'Calculated locally from source rankings'
+		};
+		var label = labels[match.method] || 'Method unavailable';
+		if (match.method === 'issn' && match.matchedIssn) {
+			var issn = String(match.matchedIssn).replace(/[^0-9X]/gi, '').toUpperCase();
+			if (issn.length === 8) label += ' ' + issn.slice(0, 4) + '-' + issn.slice(4);
+		}
+		return label;
+	},
+
 	getBadgeBackgroundColor: function(color) {
 		if (!color) return '#BDBDBD';
 		if (this.badgeColorCache[color]) {
