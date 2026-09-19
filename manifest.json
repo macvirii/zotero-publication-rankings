@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Publication Rankings",
-	"version": "0.3.7pre1",
+	"version": "0.3.7",
 	"description": "Displays journal and conference rankings (SJR, CORE, and more) in a custom Ranking column",
 	"homepage_url": "https://github.com/macvirii/zotero-publication-rankings",
 	"author": "Ben Stephens",

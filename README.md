@@ -192,7 +192,7 @@ python generate_data_js.py
 
 This generates `src/data/data.js` from the JSON files in `update-scripts/`. See [dataset provenance](update-scripts/SOURCES.md) for editions and upstream snapshot details. The local JCR dataset is retained when refreshing unrelated sources.
 
-### Validating a Test Build
+### Validating a Build
 
 ```bash
 node --test tests/*.test.cjs
@@ -201,7 +201,7 @@ bash -n build.sh
 python3 -m compileall -q update-scripts
 ```
 
-The `0.3.7pre1` package is a test build; `updates.json` still advertises the published stable release. No public release is created by building it. Install the XPI from `dist/` through Zotero's Add-ons manager, then follow [the test checklist](TESTING.md).
+Version `0.3.7` promotes the successfully tested `0.3.7pre1` build to a stable release. Install the XPI from `dist/` through Zotero's Add-ons manager, then follow [the test checklist](TESTING.md). Building locally does not publish a release.
 
 ### Building the Plugin
 
@@ -215,7 +215,7 @@ cd zotero-publication-rankings
 ./build.sh
 ```
 
-This creates the `.xpi` file ready for installation (e.g., `dist/publication-rankings-0.3.7pre1.xpi`).
+This creates the `.xpi` file ready for installation (e.g., `dist/publication-rankings-0.3.7.xpi`).
 
 ## Project Structure
 

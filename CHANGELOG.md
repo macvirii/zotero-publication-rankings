@@ -7,8 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.3.7pre1] - 2026-09-19
-- Test build: no public automatic-update manifest change.
+## [0.3.7] - 2026-09-19
+- Promoted the successfully tested 0.3.7pre1 build to a stable release and updated the automatic-update feed.
 - Refreshed SJR to the upstream 2025 data while retaining ISSNs, and CORE/ICORE to the newest available editions through 2026.
 - Replaced broad journal/conference heuristics with conservative full-title and identifier matching; ambiguous identities and conflicting identifiers are rejected.
 - Fixed Unicode-equivalent title matching and enabled ISSN-only items.

@@ -1,6 +1,6 @@
-# Testing 0.3.7pre1
+# Testing 0.3.7
 
-Build with `./build.sh`; install `dist/publication-rankings-0.3.7pre1.xpi` using Zotero's Add-ons manager. This is a prerelease for local testing; the public update feed is unchanged. The build contains no code that downloads ranking updates.
+Build with `./build.sh`; install `dist/publication-rankings-0.3.7.xpi` using Zotero's Add-ons manager. The owner confirmed successful testing of `0.3.7pre1`; this stable release changes its package version and update metadata while preserving the tested runtime code and datasets. The build contains no code that downloads ranking updates.
 
 ## Automated checks
 
