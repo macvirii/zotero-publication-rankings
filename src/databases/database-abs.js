@@ -1,59 +1,36 @@
-﻿/**
- * ABS Database Plugin
- *
- * CABS Journal Rankings (ABS) database matching strategies.
- *
- * Data source: absRankings global object from data.js
- */
-
-/* global Zotero, sjrRankings, MatchingUtils, DatabaseRegistry */
+/** CABS Journal Rankings (ABS) conservative title matcher. */
+/* global absRankings, MatchingUtils, DatabaseRegistry, SJRDatabase, JCRDatabase, ABDCDatabase, QualisCapesDatabase */
 
 var absDatabase = {
-	normalizedTitleIndex: null,
-
+	dataset: null,
+	index: null,
 	buildIndex: function() {
-		if (this.normalizedTitleIndex) {
-			return;
+		if (this.dataset !== absRankings || !this.index) {
+			this.dataset = absRankings;
+			this.index = MatchingUtils.buildSimpleTitleIndex(absRankings);
 		}
-
-		this.normalizedTitleIndex = Object.create(null);
-		for (var absTitle in absRankings) {
-			var normalized = MatchingUtils.normalizeString(absTitle);
-			if (!this.normalizedTitleIndex[normalized]) {
-				this.normalizedTitleIndex[normalized] = absRankings[absTitle];
-			}
-		}
+		return this.index;
 	},
-
-	/**
-	* Main Matching Function
-    * @param {string} title - Publication title to match
-	* @param {Function} debugLog - Debug logging function
-	* @returns {string|null} Ranking string (e.g., "1" or "4*") or null if not found
- */
-	match: function (title, debugLog) {
-		debugLog(`[ABS] Retrieving ranking from database...`);
-		this.buildIndex();
-
-		var exact = title.trim().toLowerCase();
-		var entry = absRankings[exact] || this.normalizedTitleIndex[MatchingUtils.normalizeString(title)];
-		var result = entry ? entry.abs : null;
-		if (result && result !== 'N/A') {
-			debugLog(`[ABS] ✓ Journal Found -> ${result}`);
-			return result;
-		}
-
-		debugLog(`[ABS] Journal NOT found: "${title}"`);
-		return null;
+	matchDetailed: function(title, debugLog, item) {
+		debugLog('[ABS] Retrieving ranking from database...');
+		var resolved = MatchingUtils.resolveSimpleTitle(this.buildIndex(), title, debugLog, 'ABS');
+		if (!resolved || !resolved.entry.abs || resolved.entry.abs === 'N/A') return null;
+		var known = [];
+		if (typeof SJRDatabase !== 'undefined') known.push(SJRDatabase.buildIndex());
+		if (typeof JCRDatabase !== 'undefined') known.push(JCRDatabase.buildIndex());
+		if (typeof ABDCDatabase !== 'undefined') known.push(ABDCDatabase.buildIndex());
+		if (typeof QualisCapesDatabase !== 'undefined') known.push(QualisCapesDatabase.buildIndex());
+		if (MatchingUtils.hasKnownIdentityConflict(title, item, known, debugLog, 'ABS')) return null;
+		return { rank: resolved.entry.abs, match: resolved.match };
+	},
+	match: function(title, debugLog, item) {
+		var detailed = this.matchDetailed(title, debugLog, item);
+		return detailed ? detailed.rank : null;
 	}
-}
+};
 
 DatabaseRegistry.register({
-	id: 'abs',
-	name: 'ABS Journal Ranking',
-	prefKey: 'enableABS',
-	priority: 101,
-	matcher: function (title, debugLog) {
-		return absDatabase.match(title, debugLog);
-    }
-})
+	id: 'abs', name: 'ABS Journal Ranking', prefKey: 'enableABS', priority: 101,
+	matcher: function(title, debugLog, item) { return absDatabase.match(title, debugLog, item); },
+	detailedMatcher: function(title, debugLog, item) { return absDatabase.matchDetailed(title, debugLog, item); }
+});

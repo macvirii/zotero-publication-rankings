@@ -34,11 +34,12 @@ def better_qualis(current, candidate):
     return candidate if QUALIS_ORDER.get(candidate, -1) > QUALIS_ORDER.get(current, -1) else current
 
 
-def extract_qualis_capes(xlsx_file_path, output_file='qualis_capes_2021_2024_rankings.json'):
-    by_title = {}
+def build_qualis_rankings(rows):
+    """Build identity-preserving Qualis indexes from worksheet-style rows."""
     by_issn = {}
+    title_identities = {}
 
-    for row_number, row in enumerate(iter_xlsx_rows(xlsx_file_path, sheet_name='RelatorioQualis'), start=1):
+    for row_number, row in enumerate(rows, start=1):
         if row_number == 1:
             continue
 
@@ -49,24 +50,48 @@ def extract_qualis_capes(xlsx_file_path, output_file='qualis_capes_2021_2024_ran
         if not title or qualis not in QUALIS_ORDER:
             continue
 
-        title_entry = by_title.setdefault(title, {'qualis': qualis, 'issns': []})
-        title_entry['qualis'] = better_qualis(title_entry['qualis'], qualis)
-        if issn and issn not in title_entry['issns']:
-            title_entry['issns'].append(issn)
-
         if issn:
             issn_entry = by_issn.setdefault(issn, {'qualis': qualis, 'titles': []})
             issn_entry['qualis'] = better_qualis(issn_entry['qualis'], qualis)
-            if title and title not in issn_entry['titles']:
+            if title not in issn_entry['titles']:
                 issn_entry['titles'].append(title)
 
-    result = {'byTitle': by_title, 'byIssn': by_issn}
+            identities = title_identities.setdefault(title, {})
+            identities.setdefault(
+                ('issn', issn),
+                {'qualis': qualis, 'issns': [issn]},
+            )
+        else:
+            # Without an ISSN there is no authority for joining this row to an
+            # identified journal. Preserve each distinct source-less grade as
+            # its own conservative title candidate.
+            identities = title_identities.setdefault(title, {})
+            identities.setdefault(
+                ('unidentified', qualis),
+                {'qualis': qualis, 'issns': []},
+            )
+
+    by_title = {}
+    for title, identities in title_identities.items():
+        candidates = list(identities.values())
+        for candidate in candidates:
+            if candidate['issns']:
+                candidate['qualis'] = by_issn[candidate['issns'][0]]['qualis']
+        by_title[title] = candidates[0] if len(candidates) == 1 else candidates
+
+    return {'byTitle': by_title, 'byIssn': by_issn}
+
+
+def extract_qualis_capes(xlsx_file_path, output_file='qualis_capes_2021_2024_rankings.json'):
+    rows = iter_xlsx_rows(xlsx_file_path, sheet_name='RelatorioQualis')
+    result = build_qualis_rankings(rows)
+
     with open(output_file, 'w', encoding='utf-8') as output:
         json.dump(result, output, indent=2, ensure_ascii=False)
 
     print(f'Qualis CAPES 2021-2024 saved in {output_file}')
-    print(f'  Titles: {len(by_title)}')
-    print(f'  ISSNs: {len(by_issn)}')
+    print(f"  Titles: {len(result['byTitle'])}")
+    print(f"  ISSNs: {len(result['byIssn'])}")
     return result
 
 
